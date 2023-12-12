@@ -8,7 +8,9 @@ public interface ISimpleProductService
 
     public Task<List<SimpleProductStockModel>> GetSimpleProductStocksAsync();
 
-    public Task AddNewSimpleProductAsync(SimpleProductModel simpleProduct);
+    public Task AddSimpleProductStockAsync(SimpleProductStockModel simpleProductStock);
 
-    public Task RemoveSimpleProductAsync(Guid simpleProductId);
+    public Task RemoveSimpleProductStockAsync(Guid simpleProductId);
+
+    public Task<List<ProductCategoryModel>> GetProductCategoriesAsync();
 }

@@ -51,33 +51,51 @@ public class SimpleProductService : ISimpleProductService
     public async Task<List<SimpleProductStockModel>> GetSimpleProductStocksAsync()
     {
         var result = await this.dbContext.SimpleProductStocks
-          .AsNoTracking()
-          .Select(stock => new SimpleProductStock() { SimpleProduct = stock.SimpleProduct, Quantity = stock.Quantity })
-          .ToListAsync();
+            .Include(stock => stock.SimpleProduct)
+            .ThenInclude(product => product.ProductCategories)
+            .AsNoTracking()
+            .Select(stock => new SimpleProductStock() { SimpleProduct = stock.SimpleProduct, Quantity = stock.Quantity })
+            .ToListAsync();
 
         return result.Select(simpleProductStock => simpleProductStock.MapToSimpleProductStockModel()).ToList();
     }
-
-    public async Task AddNewSimpleProductAsync(SimpleProductModel simpleProduct)
+    
+    public async Task AddSimpleProductStockAsync(SimpleProductStockModel simpleProductStock)
     {
-        this.dbContext.SimpleProducts.Add(simpleProduct.MapToSimpleProductModel());
+        this.dbContext.SimpleProductStocks.Add(simpleProductStock.MapToSimpleProductStockModel());
         await this.dbContext.SaveChangesAsync();
 
-        this.logger.Log(LogLevel.Information, $"Add new product: {simpleProduct.Id}");
+        this.logger.Log(LogLevel.Information, $"Add new product: {simpleProductStock.SimpleProductModelId}");
     }
 
-    public async Task RemoveSimpleProductAsync(Guid simpleProductId)
+    public async Task RemoveSimpleProductStockAsync(Guid simpleProductId)
     {
-        var removingSimpleProduct = await this.dbContext.SimpleProducts.FindAsync(simpleProductId);
+        var removingSimpleProductStock = 
+            await this.dbContext.SimpleProductStocks
+            .Include(stock => stock.SimpleProduct)
+            .ThenInclude(product => product.ProductCategories)
+            .Where(stock => stock.SimpleProductId == simpleProductId)
+            .FirstAsync();
 
-        if (removingSimpleProduct is null) 
+        if (removingSimpleProductStock is null) 
         {
-            this.logger.LogError($"no fount with product id: {simpleProductId}");
-            throw new ArgumentNullException(nameof(removingSimpleProduct));
+            this.logger.LogError($"no product found with id: {simpleProductId}");
+            throw new ArgumentNullException(nameof(removingSimpleProductStock));
         }
 
-        this.dbContext.Remove(removingSimpleProduct);
+        this.dbContext.Remove(removingSimpleProductStock);
+
         await this.dbContext.SaveChangesAsync();
         this.logger.Log(LogLevel.Information, $"remove product: {simpleProductId}");
+    }
+
+    public async Task<List<ProductCategoryModel>> GetProductCategoriesAsync() 
+    {
+        var result = await this.dbContext.ProductCategories
+          .AsNoTracking()
+          .Select(category => new ProductCategoryModel(category.Id, category.Name))
+          .ToListAsync();
+
+        return result;
     }
 }

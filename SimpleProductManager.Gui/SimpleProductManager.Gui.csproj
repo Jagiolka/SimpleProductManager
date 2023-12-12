@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SimpleProductManager.BusinessLayer\SimpleProductManager.BusinessLayer.csproj" />
     <ProjectReference Include="..\SimpleProductManager.DataLayer\SimpleProductManager.DataLayer.csproj" />
   </ItemGroup>
 

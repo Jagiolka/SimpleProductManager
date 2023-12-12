@@ -1,0 +1,20 @@
+# Erstellen Sie eine neue Datenbank mit dem Namen "SimpleProductDatabase"
+$command = "sqlcmd -S (localdb)\MSSQLLocalDB -Q \"CREATE DATABASE SimpleProductDatabase;\""
+Invoke-Expression $command
+
+# Erstellen Sie eine Tabelle mit dem Namen "ProductCategory" mit den Spalten "id" und "name"
+$command = "sqlcmd -S (localdb)\MSSQLLocalDB -d SimpleProductDatabase -Q \"CREATE TABLE ProductCategory (id UNIQUEIDENTIFIER PRIMARY KEY, name NVARCHAR(50));\""
+Invoke-Expression $command
+
+# Erstellen Sie eine Tabelle mit dem Namen "SimpleProduct" mit den Spalten "id", "name" und "Categories"
+$command = "sqlcmd -S (localdb)\MSSQLLocalDB -d SimpleProductDatabase -Q \"CREATE TABLE SimpleProduct (id UNIQUEIDENTIFIER PRIMARY KEY, name NVARCHAR(50), Categories NVARCHAR(MAX));\""
+Invoke-Expression $command
+
+# Erstellen Sie eine Tabelle mit dem Namen "SimpleProductStock" mit den Spalten "simpleProductModel" und "quantity"
+$command = "sqlcmd -S (localdb)\MSSQLLocalDB -d SimpleProductDatabase -Q \"CREATE TABLE SimpleProductStock (simpleProductModel UNIQUEIDENTIFIER FOREIGN KEY REFERENCES SimpleProduct(id), quantity INT);\""
+Invoke-Expression $command
+
+
+
+
+Scaffold-DbContext -Connection "Server=(localdb)\mssqllocaldb;Database=SimpleProductDatabase;Trusted_Connection=True;Integrated Security=True;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False;" -Provider Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entities -Context SimpleProductContext

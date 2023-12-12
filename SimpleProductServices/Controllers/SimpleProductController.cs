@@ -20,31 +20,37 @@ public class SimpleProductController : ControllerBase
         this.simpleProductService = simpleProductService;
     }
 
-    [HttpPut(Name = "SimpleProductContext/Init")]
+    [HttpPut("Init")]
     [SwaggerOperation("InitDemoDatabase")]
     public async Task InitDemoDatabaseAsync()
     {
         await this.simpleProductService.InitDemoDatabaseAsync();
     }
 
-    [HttpGet(Name = "SimpleProductContext/GetAll")]
+    [HttpGet("GetAll")]
     [SwaggerOperation("GetSimpleProducts")]
     public async Task<List<SimpleProductStockModel>> GetSimpleProductsAsync()
     {
         return await this.simpleProductService.GetSimpleProductStocksAsync();
     }
 
-    [HttpPost(Name = "AddNewSimpleProduct")]
-    [SwaggerOperation("AddNewSimpleProduct")]
-    public async Task AddNewSimpleProductAsync(SimpleProductModel simpleProductModel)
+    [HttpPost("Add")]
+    [SwaggerOperation("AddSimpleProduct")]
+    public async Task AddSimpleProductAsync(SimpleProductStockModel simpleProductStockModel)
     {
-        await this.simpleProductService.AddNewSimpleProductAsync(simpleProductModel);
+        await this.simpleProductService.AddSimpleProductStockAsync(simpleProductStockModel);
     }
 
-    [HttpDelete(Name = "SimpleProductContext/Remove/{simpleProductId}")]
+    [HttpDelete("Remove/{simpleProductId}")]
     [SwaggerOperation("RemoveSimpleProduct")]
     public async Task RemoveSimpleProductAsync(Guid simpleProductId)
     {
-        await this.simpleProductService.RemoveSimpleProductAsync(simpleProductId);
+        await this.simpleProductService.RemoveSimpleProductStockAsync(simpleProductId);
+    }
+
+    [HttpGet("GetProductCategories")]
+    public async Task<List<ProductCategoryModel>> GetProductCategoriesAsync()
+    {
+        return await this.simpleProductService.GetProductCategoriesAsync();
     }
 }
