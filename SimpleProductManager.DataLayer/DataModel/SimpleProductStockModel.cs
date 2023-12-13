@@ -1,13 +1,23 @@
 ﻿namespace SimpleProductManager.DataLayer.DataModel;
 
+using System.Text;
+
 public class SimpleProductStockModel
 {
-    public SimpleProductStockModel(SimpleProductModel simpleProductModel, int quantity)
+    public SimpleProductStockModel() : this(Guid.NewGuid(), string.Empty, new List<ProductCategoryModel>(), 0) // new product as default
     {
-        this.simpleProductModel = simpleProductModel;
+    }
+
+    public SimpleProductStockModel(Guid simpleProductModelId, string productName, List<ProductCategoryModel> categories, int quantity)
+    {
+        this.SimpleProductModelId = simpleProductModelId;
+        this.Name = productName;
+        this.ProductCategories = categories;
         this.Quantity = quantity;
     }
 
-    public SimpleProductModel simpleProductModel { get; init; }
+    public Guid SimpleProductModelId { get; init; }
+    public string Name { get; set; }
+    public List<ProductCategoryModel> ProductCategories { get; set; }
     public int Quantity { get; init; }
 }

@@ -157,7 +157,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private async Task UpdateSimpleProductAsync(SimpleProductStockModel simpleProductStockModel) 
     {
-        // TODO: update
+        // TODO: update hinzufügen
         //await this.httpClientManager.UpdateSimpleProductAsync(simpleProductStockModel);
     }
 }

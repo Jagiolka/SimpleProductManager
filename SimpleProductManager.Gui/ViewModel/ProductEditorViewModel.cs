@@ -61,7 +61,6 @@ public partial class ProductEditorViewModel : ObservableObject
     [RelayCommand]
     public async Task SaveExitAsync(Window window)
     {
-
         var spm = this.EditingSimpleProductStockModel;
         if (this.IsEveryPropertyValid())
         {

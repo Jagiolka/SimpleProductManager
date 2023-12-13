@@ -13,7 +13,7 @@ public class CategoryListToStringConverter : IValueConverter
     {
         if (value is List<ProductCategoryModel> categoryList)
         {
-            return string.Join("", categoryList.Select(category => category.Name));
+            return string.Join(", ", categoryList.Select(category => category.Name));
         }
 
         return string.Empty;
