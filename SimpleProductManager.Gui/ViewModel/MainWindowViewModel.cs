@@ -70,6 +70,8 @@ public partial class MainWindowViewModel : ObservableObject
         this.FilteredSimpleProductList = [];
 
         this.dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
+
+        Task.Run(LoadSimpleProductStockListAsync);
         this.ProductCategories = Task.Run(GetProductCategoriesAsync).Result; 
     }
 
@@ -92,31 +94,35 @@ public partial class MainWindowViewModel : ObservableObject
         var productViewModelDataContext = (ProductEditorViewModel)dialogWindow.DataContext;
         productViewModelDataContext.Init(null, ProductCategories);
 
-        
-
         var dialogResult = dialogWindow.ShowDialog() ?? false;
 
         if (dialogResult)
         {
-            await this.AddSimpleProductAsync(productViewModelDataContext.EditingSimpleProductStockModel);
+            await this.httpClientManager.AddSimpleProductAsync(productViewModelDataContext.EditingSimpleProductStockModel);
+            await this.LoadSimpleProductStockListAsync();
             this.logger.LogInformation(string.Format(ConstantMessages.MainWindowViewModel_AddProduct, productViewModelDataContext.EditingSimpleProductStockModel.SimpleProductModelId));
         }
     }
 
     [RelayCommand]
     public async Task EditProductStockAsync()
-    {        
+    {
+        if (this.SelectedProductStock is null)
+        {
+            return;
+        }
+
         dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
 
         var productViewModelDataContext = (ProductEditorViewModel)dialogWindow.DataContext;
         productViewModelDataContext.Init(this.SelectedProductStock, ProductCategories);
 
-        // productViewModelDataContext.SimpleProductStockModel = this.SelectedProductStock;
         var dialogResult = dialogWindow.ShowDialog() ?? false;
 
         if (dialogResult)
         {
-            await UpdateSimpleProductAsync(this.SelectedProductStock);
+            // TODO: update hinzufügen
+            // await this.httpClientManager.UpdateSimpleProductAsync(simpleProductStockModel);
             this.logger.LogInformation(string.Format(ConstantMessages.MainWindowViewModel_AddProduct, this.SelectedProductStock.SimpleProductModelId));
         }
     }
@@ -124,8 +130,15 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     public async Task RemoveProductStockAsync()
     {
-        await this.RemoveSimpleProductAsync(this.SelectedProductStock);
-        this.logger.LogInformation(string.Format(ConstantMessages.MainWindowViewModel_RemoveProduct, this.SelectedProductStock.SimpleProductModelId));
+        if (this.SelectedProductStock is null)
+        { 
+            return; 
+        }
+
+        var selectedSimpleProductModelId = this.SelectedProductStock.SimpleProductModelId;
+        await this.httpClientManager.RemoveProductStockAsync(this.SelectedProductStock);
+        await this.LoadProductStockListAsync();
+        this.logger.LogInformation(string.Format(ConstantMessages.MainWindowViewModel_RemoveProduct, selectedSimpleProductModelId));
     }
     
     private void SetFilteredSimpleProductList(string filterText)
@@ -143,21 +156,9 @@ public partial class MainWindowViewModel : ObservableObject
         return await this.httpClientManager.GetProductCategoriesAsync();
     }
 
-    private async Task AddSimpleProductAsync(SimpleProductStockModel simpleProductStockModel)
+    private async Task LoadSimpleProductStockListAsync()
     {
-        this.SimpleProductStockList.Add(simpleProductStockModel);
-        await this.httpClientManager.AddSimpleProductAsync(simpleProductStockModel);
-    }
-
-    private async Task RemoveSimpleProductAsync(SimpleProductStockModel simpleProductStockModel)
-    {
-        this.SimpleProductStockList.Remove(simpleProductStockModel);
-        await this.httpClientManager.RemoveProductStockAsync(simpleProductStockModel);
-    }
-
-    private async Task UpdateSimpleProductAsync(SimpleProductStockModel simpleProductStockModel) 
-    {
-        // TODO: update hinzufügen
-        //await this.httpClientManager.UpdateSimpleProductAsync(simpleProductStockModel);
+        var loadedProductStockList = await this.httpClientManager.GetSimpleProductStockAsync();
+        this.SimpleProductStockList = new ObservableCollection<SimpleProductStockModel>(loadedProductStockList);
     }
 }

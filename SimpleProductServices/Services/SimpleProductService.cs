@@ -62,7 +62,8 @@ public class SimpleProductService : ISimpleProductService
     
     public async Task AddSimpleProductStockAsync(SimpleProductStockModel simpleProductStock)
     {
-        this.dbContext.SimpleProductStocks.Add(simpleProductStock.MapToSimpleProductStockModel());
+        var productStockEntity = simpleProductStock.MapToSimpleProductStockModel();
+        this.dbContext.SimpleProductStocks.Add(productStockEntity);
         await this.dbContext.SaveChangesAsync();
 
         this.logger.Log(LogLevel.Information, $"Add new product: {simpleProductStock.SimpleProductModelId}");

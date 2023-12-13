@@ -18,6 +18,7 @@ public static class SimpleProductStockModelExtensions
 
         return new SimpleProductStock()
         {
+            SimpleProductId = simpleProductStockModel.SimpleProductModelId,
             SimpleProduct = productModel,
             Quantity = simpleProductStockModel.Quantity,
         };

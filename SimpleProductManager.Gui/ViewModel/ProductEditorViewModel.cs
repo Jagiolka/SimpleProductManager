@@ -36,6 +36,7 @@ public partial class ProductEditorViewModel : ObservableObject
         this.ProductCategories = productCategories;
     }
 
+    // TODO: category changes is not visible for controls
     [RelayCommand]
     public async Task AddCategoryAsync()
     {
