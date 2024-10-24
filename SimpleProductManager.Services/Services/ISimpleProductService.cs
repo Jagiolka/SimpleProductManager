@@ -1,6 +1,6 @@
-﻿namespace SimpleProductServices.Services;
+﻿using SimpleProductServices.Model;
 
-using SimpleProductManager.DataLayer.DataModel;
+namespace SimpleProductServices.Services;
 
 public interface ISimpleProductService
 {

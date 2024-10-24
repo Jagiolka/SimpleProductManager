@@ -1,6 +1,4 @@
-﻿namespace SimpleProductManager.DataLayer.DataModel;
-
-using System.Text;
+﻿namespace SimpleProductServices.Model;
 
 public class SimpleProductStockModel
 {

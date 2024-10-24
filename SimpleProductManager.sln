@@ -5,13 +5,9 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProductManager.Gui", "SimpleProductManager.Gui\SimpleProductManager.Gui.csproj", "{DC43AB23-55DC-4521-B193-8608E4FED23B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProductManager.DataLayer", "SimpleProductManager.DataLayer\SimpleProductManager.DataLayer.csproj", "{BCF87130-97AA-49E1-834D-0DD5FAE6A7C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProductManager.Data", "SimpleProductManager.DataLayer\SimpleProductManager.Data.csproj", "{BCF87130-97AA-49E1-834D-0DD5FAE6A7C2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimpleProdcutManager", "SimpleProdcutManager", "{E6F8E32D-92CD-46A4-B7D4-AB1429D841B4}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{14937F21-D938-4124-B5E5-15D0C0AF105F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProductServices", "SimpleProductServices\SimpleProductServices.csproj", "{D6F3FFA4-5B91-488B-B204-9FA64FFF8200}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProductManager.Services", "SimpleProductManager.Services\SimpleProductManager.Services.csproj", "{D6F3FFA4-5B91-488B-B204-9FA64FFF8200}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,11 +30,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{DC43AB23-55DC-4521-B193-8608E4FED23B} = {E6F8E32D-92CD-46A4-B7D4-AB1429D841B4}
-		{BCF87130-97AA-49E1-834D-0DD5FAE6A7C2} = {E6F8E32D-92CD-46A4-B7D4-AB1429D841B4}
-		{D6F3FFA4-5B91-488B-B204-9FA64FFF8200} = {14937F21-D938-4124-B5E5-15D0C0AF105F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {87233C6B-2145-4BDA-A8FA-3DAB621ED1F8}

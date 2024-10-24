@@ -1,13 +1,8 @@
-﻿namespace SimpleProductManager.DataLayer;
-
+﻿using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using SimpleProductManager.DataLayer.DataModel;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
+
+namespace SimpleProductManager.Data;
 
 public class HttpClientManager : IHttpClientManager
 {

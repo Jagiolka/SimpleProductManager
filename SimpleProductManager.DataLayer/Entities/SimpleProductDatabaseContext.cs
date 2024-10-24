@@ -1,18 +1,7 @@
-﻿namespace SimpleProductServices.Entities;
+﻿namespace SimpleProductManager.Data.Entities;
 
-using Microsoft.EntityFrameworkCore;
-
-public partial class SimpleProductContext : DbContext
+public partial class SimpleProductDatabaseContext(DbContextOptions<SimpleProductDatabaseContext> options) : DbContext(options)
 {
-    public SimpleProductContext()
-    {
-    }
-
-    public SimpleProductContext(DbContextOptions<SimpleProductContext> options)
-        : base(options)
-    {
-    }
-
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
     public virtual DbSet<SimpleProduct> SimpleProducts { get; set; }

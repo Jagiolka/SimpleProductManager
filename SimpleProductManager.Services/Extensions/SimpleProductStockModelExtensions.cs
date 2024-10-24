@@ -1,7 +1,8 @@
-﻿namespace SimpleProductServices.Extensions;
+﻿using SimpleProductManager.Data.Entities;
+using SimpleProductServices.Model;
 
-using SimpleProductManager.DataLayer.DataModel;
-using SimpleProductServices.Entities;
+namespace SimpleProductServices.Extensions;
+
 using System.Linq;
 
 public static class SimpleProductStockModelExtensions

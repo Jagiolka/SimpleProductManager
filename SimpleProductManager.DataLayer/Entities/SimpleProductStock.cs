@@ -1,4 +1,4 @@
-﻿namespace SimpleProductServices.Entities;
+﻿namespace SimpleProductManager.Data.Entities;
 
 public partial class SimpleProductStock
 {

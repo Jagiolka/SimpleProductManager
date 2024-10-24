@@ -1,6 +1,4 @@
-﻿namespace SimpleProductManager.DataLayer;
-
-using SimpleProductManager.DataLayer.DataModel;
+﻿namespace SimpleProductManager.Data;
 
 public interface IHttpClientManager
 {

@@ -1,4 +1,4 @@
-﻿namespace SimpleProductManager.DataLayer.DataModel;
+﻿namespace SimpleProductServices.Model;
 
 public class SimpleProductModel
 {

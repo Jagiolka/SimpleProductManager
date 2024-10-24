@@ -1,10 +1,10 @@
-﻿namespace SimpleProductServices.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 
-using System;
-using System.Collections.Generic;
+namespace SimpleProductManager.Data.Entities;
 
 public partial class SimpleProduct
 {
+    [Key]
     public Guid Id { get; set; }
 
     public string Name { get; set; } = null!;
