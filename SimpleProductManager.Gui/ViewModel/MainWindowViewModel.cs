@@ -1,10 +1,11 @@
-﻿namespace SimpleProductManager.Gui.ViewModel;
+﻿using SimpleProductManager.Data;
+
+namespace SimpleProductManager.Gui.ViewModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SimpleProductManager.DataLayer;
 using SimpleProductManager.DataLayer.DataModel;
 using SimpleProductManager.Gui.View;
 using System;

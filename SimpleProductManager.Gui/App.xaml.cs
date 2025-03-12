@@ -1,9 +1,10 @@
-﻿namespace SimpleProductManager.Gui;
+﻿using SimpleProductManager.Data;
+
+namespace SimpleProductManager.Gui;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SimpleProductManager.DataLayer;
 using SimpleProductManager.Gui.View;
 using SimpleProductManager.Gui.ViewModel;
 using System.Windows;

@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SimpleProductManager.DataLayer\SimpleProductManager.DataLayer.csproj" />
+    <ProjectReference Include="..\SimpleProductManager.DataLayer\SimpleProductManager.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
