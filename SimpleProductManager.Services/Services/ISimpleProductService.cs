@@ -1,16 +1,15 @@
-﻿using SimpleProductServices.Model;
+﻿using SimpleProductServices.Controllers;
+using SimpleProductServices.Model;
 
 namespace SimpleProductServices.Services;
 
 public interface ISimpleProductService
 {
-    public Task InitDemoDatabaseAsync();
+    public Task<List<SimpleProductModel>> GetAllSimpleProductsAsync();
 
-    public Task<List<SimpleProductStockModel>> GetSimpleProductStocksAsync();
+    public Task<SimpleProductModel?> GetSimpleProductByProductIdAsync(Guid productId);
 
-    public Task AddSimpleProductStockAsync(SimpleProductStockModel simpleProductStock);
+    public Task AddSimpleProductAsync(SimpleProductInputModel simpleProductInputModel);
 
-    public Task RemoveSimpleProductStockAsync(Guid simpleProductId);
-
-    public Task<List<ProductCategoryModel>> GetProductCategoriesAsync();
+    public Task RemoveSimpleProductAsync(Guid productId);    
 }

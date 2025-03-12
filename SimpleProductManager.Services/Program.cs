@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using SimpleProductManager.Data.Entities;
+using SimpleProductManager.Services;
 using SimpleProductServices.Controllers;
 using SimpleProductServices.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Configuration
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-// builder.Services.Configure<ServiceConfiguration>(builder.Configuration.GetSection("ProductExport"));
 
 // Serilog
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
@@ -18,29 +17,19 @@ builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
 
 // Helper
 
-// DatabaseContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-    options.EnableServiceProviderCaching(false);
-    options.UseMemoryCache(null);
-    options.UseSqlServer(builder.Configuration.GetConnectionString("easyqs_data") ??
-                         builder.Configuration.GetConnectionString("QS_Patient"));
-});
-
-// Repositories
-
 // Services
-
-
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<SimpleProductController>();
+builder.Services.AddScoped<SimpleProductCategoryController>();
+
 builder.Services.AddScoped<ISimpleProductService, SimpleProductService>();
-builder.Services.AddDbContext<SimpleProductDatabaseContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SimpleProductDatabase")));
+builder.Services.AddScoped<ISimpleProductCategoryService, SimpleProductCategoryService>();
+
+// DatabaseContext
+builder.Services.AddDbContext<SimpleProductDatabaseContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SimpleProductDatabaseDefaultConnection")));
 
 builder.Services.AddControllers();
 

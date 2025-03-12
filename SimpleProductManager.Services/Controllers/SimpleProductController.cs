@@ -4,48 +4,77 @@ using SimpleProductServices.Model;
 using SimpleProductServices.Services;
 
 using ILogger = Serilog.ILogger;
+using SimpleProductManager.Services.Entities;
 
 namespace SimpleProductServices.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [SwaggerTag]
-public class SimpleProductController(
-    ILogger logger,
-    ISimpleProductService simpleProductService)
-    : ControllerBase
+public class SimpleProductController(ILogger logger, ISimpleProductService simpleProductService) : ControllerBase
 {
-    [HttpPut("Init")]
-    [SwaggerOperation("InitDemoDatabase")]
-    public async Task InitDemoDatabaseAsync()
+    [HttpGet("GetAll")]
+    [SwaggerOperation("GetAllSimpleProducts")]
+    public async Task<IActionResult> GetAllSimpleProductsAsync()
     {
-        await simpleProductService.InitDemoDatabaseAsync();
+        try
+        {
+            var serviceResult = await simpleProductService.GetAllSimpleProductsAsync();
+            return Ok(serviceResult);
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex.ToString());
+            return StatusCode(500, ex.Message);
+        }
     }
 
-    [HttpGet("GetAll")]
-    [SwaggerOperation("GetSimpleProducts")]
-    public async Task<List<SimpleProductStockModel>> GetSimpleProductsAsync()
+    [HttpGet("GetBySimpleProductId")]
+    [SwaggerOperation("GetSimpleProduct")]
+    public async Task<IActionResult> GetSimpleProductsAsync(Guid simpleProductId)
     {
-        return await simpleProductService.GetSimpleProductStocksAsync();
+        try
+        {
+            var serviceResult = await simpleProductService.GetSimpleProductByProductIdAsync(simpleProductId);
+            return Ok(serviceResult);
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex.ToString());
+            return StatusCode(500, ex.Message);
+        }
     }
 
     [HttpPost("Add")]
     [SwaggerOperation("AddSimpleProduct")]
-    public async Task AddSimpleProductAsync(SimpleProductStockModel simpleProductStockModel)
+    public async Task<IActionResult> AddSimpleProductAsync([FromBody] SimpleProductInputModel SimpleProductInputModel)
     {
-        await simpleProductService.AddSimpleProductStockAsync(simpleProductStockModel);
+        try
+        {
+            await simpleProductService.AddSimpleProductAsync(SimpleProductInputModel);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex.ToString());
+            return StatusCode(500, ex.Message);
+        }
     }
 
-    [HttpDelete("Remove/{simpleProductId}")]
+    [HttpDelete("RemoveBySimpleProductId")]
     [SwaggerOperation("RemoveSimpleProduct")]
-    public async Task RemoveSimpleProductAsync(Guid simpleProductId)
+    public async Task<IActionResult> RemoveSimpleProductAsync(Guid simpleProductId)
     {
-        await simpleProductService.RemoveSimpleProductStockAsync(simpleProductId);
-    }
-
-    [HttpGet("GetProductCategories")]
-    public async Task<List<ProductCategoryModel>> GetProductCategoriesAsync()
-    {
-        return await simpleProductService.GetProductCategoriesAsync();
+        try
+        {
+            await simpleProductService.RemoveSimpleProductAsync(simpleProductId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex.ToString());
+            return StatusCode(500, ex.Message);
+        }
     }
 }
+public record SimpleProductInputModel(string SimpleProductName, string SimpleProductDescription, Guid SimpleProductCategoryId, decimal SimpleProductPrice);

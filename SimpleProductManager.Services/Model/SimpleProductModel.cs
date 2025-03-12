@@ -1,15 +1,10 @@
 ﻿namespace SimpleProductServices.Model;
 
-public class SimpleProductModel
+public class SimpleProductModel(Guid id, string name, string description, decimal price, SimpleProductCategoryModel simpleProductCategory)
 {
-    public SimpleProductModel(Guid id, string name, List<ProductCategoryModel> ProductCategories)
-    {
-        this.Id = id;
-        this.Name = name;
-        this.ProductCategories = ProductCategories;
-    }
-
-    public Guid Id { get; init; }
-    public string Name { get; init; }
-    public List<ProductCategoryModel> ProductCategories { get; set; }
+    public Guid Id { get; init; } = id;
+    public string Name { get; init; } = name;
+    public string Description { get; init; } = description;
+    public SimpleProductCategoryModel SimpleProductCategory { get; init; } = simpleProductCategory;
+    public decimal Price { get; init; } = price;
 }
