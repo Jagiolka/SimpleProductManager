@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleProductManager.Gui.View"
         xmlns:viewModels="clr-namespace:SimpleProductManager.Gui.ViewModel"
+        xmlns:converter="clr-namespace:SimpleProductManager.Gui.Converter"
         mc:Ignorable="d"
         Title="ProductEditorWindow" MinHeight="450" MaxHeight="450" MinWidth="600" MaxWidth="600"
         d:DataContext="{d:DesignInstance viewModels:ProductEditorViewModel}">
@@ -23,37 +24,43 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="*" />
             <RowDefinition Height="30" />
             <RowDefinition Height="15" />
         </Grid.RowDefinitions>
         
-        <Label Grid.Row="1" Grid.Column="1" Content="SimpleProductModelId" />
+        <Label Grid.Row="1" Grid.Column="1" Content="SimpleProductId" />
+        <TextBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductModel.Id}" IsReadOnly="True" />
+        
         <Label Grid.Row="2" Grid.Column="1" Content="Name" />
-        <Label Grid.Row="3" Grid.Column="1" Content="Anzahl" />
-        <Label Grid.Row="4" Grid.Column="1" Content="Kategorien" />
+        <TextBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductModel.Name, UpdateSourceTrigger=PropertyChanged}"  />
+        
+        <Label Grid.Row="3" Grid.Column="1" Content="Beschreibung" />
+        <TextBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductModel.Description, UpdateSourceTrigger=PropertyChanged}"  />
+        
+        <Label Grid.Row="4" Grid.Column="1" Content="Preis" />
+        <TextBox Grid.Row="4" Grid.Column="2">
+            <TextBox.Text>
+                <Binding Path="EditingSimpleProductModel.Price" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.Converter>
+                        <converter:PriceFormatConverter />
+                    </Binding.Converter>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        
+        <Label Grid.Row="5" Grid.Column="1" Content="Kategorien" />        
+        <ComboBox Grid.Row="5" Grid.Column="2" 
+                  ItemsSource="{Binding ProductCategories, UpdateSourceTrigger=PropertyChanged}" 
+                  SelectedItem="{Binding SelectedComboBoxProductCategory, UpdateSourceTrigger=PropertyChanged}" 
+                  DisplayMemberPath="Name" 
+                  Text="{Binding SelectedStringName, UpdateSourceTrigger=PropertyChanged}"
+                  IsEditable="True" Margin="0,3,0,3" />
+        <Button Content="+" Grid.Row="5" Grid.Column="3" Height="20" VerticalAlignment="Center" Margin="2" Command="{Binding AddCategoryCommand}" CommandParameter="{Binding SelectedStringName}" />
+        <Button Content="-" Grid.Row="5" Grid.Column="4" Height="20" VerticalAlignment="Center" Margin="2" Command="{Binding RemoveCategoryCommand}" CommandParameter="{Binding SelectedComboBoxProductCategory}" />
 
-        <TextBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductStockModel.SimpleProductModelId}" IsReadOnly="True" />
-        <TextBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductStockModel.Name}"  />
-        <TextBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductStockModel.Quantity}"  />
-        <ComboBox Grid.Row="4" Grid.Column="2" ItemsSource="{Binding ProductCategories}" SelectedItem="{Binding SelectedComboBoxProductCategory}" DisplayMemberPath="Name" Margin="0,3,0,3" />
-        <Button Content="+" Grid.Row="4" Grid.Column="3" Height="20" VerticalAlignment="Center" Margin="2" Command="{Binding AddCategoryCommand}" />
-
-        <ListView Grid.Row="5" Grid.Column="2" Height="250"
-                  x:Name="ListViewProductCategories" 
-                  ItemsSource="{Binding EditingSimpleProductStockModel.ProductCategories}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Background="AliceBlue">
-                        <Label Content="{Binding Name}"  Margin="5" Width="280"  />
-                        <Button Content="-" Width="20" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2" 
-                                Command="{Binding ElementName=ListViewProductCategories, Path=DataContext.RemoveCategoryCommand}" CommandParameter="{Binding}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-
-        <StackPanel Grid.Row="6" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="7" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Speichern" Height="20" Margin="0,2,2,2" Command="{Binding SaveExitCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
             <Button Content="Abbrechen" Height="20" Margin="2,2,0,2" Command="{Binding CancelExitCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
         </StackPanel>

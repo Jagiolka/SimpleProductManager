@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+
+using SimpleProductServices.Model;
 using SimpleProductServices.Services;
 
 using ILogger = Serilog.ILogger;
+
 
 namespace SimpleProductServices.Controllers;
 
@@ -11,8 +14,16 @@ namespace SimpleProductServices.Controllers;
 [SwaggerTag]
 public class SimpleProductCategoryController(ILogger logger, ISimpleProductCategoryService simpleProductCategoryService) : ControllerBase
 {
+    /// <summary>
+    /// Retrieves all simple ProductCategories.
+    /// </summary>
+    /// <returns>A list of all simple ProductCategories.</returns>
+    /// <response code="200">Returns the list of simple ProductCategories.</response>
+    /// <response code="500">If an internal server error occurs.</response>
     [HttpGet("GetAll")]
     [SwaggerOperation("GetAllProductCategories")]
+    [ProducesResponseType(typeof(SimpleProductModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllProductCategoriesAsync()
     {
         try
@@ -27,8 +38,17 @@ public class SimpleProductCategoryController(ILogger logger, ISimpleProductCateg
         }
     }
 
+    /// <summary>
+    /// Retrieves a simple ProductCategory by its SimpleProductCategoryId.
+    /// </summary>
+    /// <param name="productCategoryId">The unique identifier of the simple ProductCategory.</param>
+    /// <returns>The simple ProductCategory with the specified ID.</returns>
+    /// <response code="200">Returns the requested simple ProductCategory.</response>
+    /// <response code="500">If an internal server error occurs.</response>
     [HttpGet("GetByProductCategoryId")]
     [SwaggerOperation("GetProductCategoriesByProductCategoryId")]
+    [ProducesResponseType(typeof(SimpleProductModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetProductCategoryByProductCategoryIdAsync(Guid productCategoryId)
     {
         try
@@ -43,8 +63,17 @@ public class SimpleProductCategoryController(ILogger logger, ISimpleProductCateg
         }
     }
 
+    /// <summary>
+    /// Adds a new simple ProductCategory.
+    /// </summary>
+    /// <param name="productCategoryName">The name of the simple ProductCategory to add.</param>
+    /// <returns>The new created simple ProductCategory.</returns>
+    /// <response code="200">Returns the new created simple ProductCategory.</response>
+    /// <response code="500">If an internal server error occurs.</response>
     [HttpPost("Add")]
     [SwaggerOperation("AddProductCategory")]
+    [ProducesResponseType(typeof(SimpleProductModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> AddProductCategoryAsync(string productCategoryName)
     {
         try
@@ -59,13 +88,22 @@ public class SimpleProductCategoryController(ILogger logger, ISimpleProductCateg
         }        
     }
 
+    /// <summary>
+    /// Removes a simple ProductCategory by SimpleProductCategoryId.
+    /// </summary>
+    /// <param name="simpleProductCategoryId">The unique identifier of the simple ProductCategory to remove.</param>
+    /// <returns>No content.</returns>
+    /// <response code="200">If the simple ProductCategory was removed successfully.</response>
+    /// <response code="500">If an internal server error occurs.</response>
     [HttpDelete("RemoveByProductCategoryId")]
     [SwaggerOperation("RemoveProductCategory")]
-    public async Task<IActionResult> RemoveProductCategoryAsync(Guid productCategoryId)
+    [ProducesResponseType(typeof(SimpleProductModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RemoveProductCategoryAsync(Guid simpleProductCategoryId)
     {
         try
         {
-            await simpleProductCategoryService.RemoveSimpleProductCategoryAsync(productCategoryId);
+            await simpleProductCategoryService.RemoveSimpleProductCategoryAsync(simpleProductCategoryId);
             return Ok();
         }
         catch (Exception ex)
