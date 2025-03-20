@@ -3,47 +3,51 @@
 ### Beschreibung
 Bei dem SimpleProductManager handelt es sich um eine "Spielwiese" auf C# .Net 9.0.
 
-Die Anwendung ist aktuell nicht sonderlich hübsch (WPF Style), es sind auch keine Tests vorhanden.
-
 Der SimpleProdcutManager besteht aus 2 Anwendungsteilen:
 - __Service:__ ASP .Net Core Rest Schnitstellen zur Datenbereitstellung mittels Entity Framework Core. Datenbankstrukturbereitstellung durch Migration.
 - __GUI:__ Anwenderoberfläche mit WPF
 
-##### Datenbank mit Docker
-Zur Bereitstellung der Datenbank nutze ich Docker.
-Dazu folgende Zeilen in der Docker BASH verwenden:
+### 1. Datenbank-Server mit Docker
+Zur Bereitstellung der Datenbank nutze ich Docker über WSL unter Windows 11.
 
-pull image:
+#### Docker Image
+Um einen MS SQL Server nutzen zu können, müssen wir erst ein Docker Image beziehen.
+Dazu folgende Zeilen in der Docker BASH ausführen (ich nutze dazu das Docker.Desktop Terminal):
+
+__pull image:__
 ``` BASH 
 docker pull mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-start docker from image (as example: docker terminal):
+Um aus dem Image ein Container bereitzustellen (damit ein aufrufbaren SQL Server):
 ``` BASH
 docker run -dit -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=.saP4ssword' -p 1433:1433 --name sqlServerContainer mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-ConnectionString:
+__ConnectionString:__
 ```
 Server=localhost,1433;Database=SimpleProductDatabase;User Id=sa;Password=.saP4ssword;TrustServerCertificate=True;
 ```
 (da es sich um eine Entwicklungsumgebung handelt => TrustServerCertificate=True;)
 
-##### Migration
-Migration-Initialisierung im "Microsoft Visual Studio" "Package Manager Console".
+### 2. Migration
+Migration-Befehle gebe ich im "Package Manager Console" des "Microsoft Visual Studio" ein.
+
+#### 2.1 Migration Initialisierung
+__!__ _Dieser Schritt ist nur nötig sollten noch keine Migrations-Dateien im Projekt existieren._
+
+
 Mit folgendem Befehl wird der Projekt-Ordner "Migrations" angelegt, und die Dateien \<DatenbankName\>ContextModelSnapshot.cs und \<Datum\>_\<DatenbankName\>.cs erstellt. 
-Dieser Schritt ist nur nötig sollten noch keine Migrations-Dateien existieren.
+Als Beispiel aus dem Projekt: 
+_20250312204530_Init_SimpleProductDatabase.cs_
+_SimpleProductDatabaseContextModelSnapshot.cs_
 ```
 Add-Migration SimpleProductDatabase
 ```
 
-'Update-Database' erstellt die Datenbankstruktur aus den Migrationsdaten in der Datenbank aus den Appsettings.
+#### 2.2 Datenbank erstellen anhand der Migrations-Dateien
+'Update-Database' erstellt/updated die Datenbankstruktur aus den Migrationsdaten in der Datenbank aus den Appsettings.
+__Wichtig:__ In der "Package Manager Console" erst das Default-Projekt auswählen. (hier _SimpleProductManager.Services_)
 ```
 Update-Database -verbose
 ```
-
-
-
-
-
-
