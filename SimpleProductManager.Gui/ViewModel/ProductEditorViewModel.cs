@@ -1,79 +1,81 @@
-﻿namespace SimpleProductManager.Gui.ViewModel;
-
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
-using SimpleProductManager.DataLayer.DataModel;
-using System.Collections.Generic;
+using SimpleProductManager.Gui.Manager;
+using SimpleProductServices.Model;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using ILogger = Serilog.ILogger;
 
-public partial class ProductEditorViewModel : ObservableObject
+namespace SimpleProductManager.Gui.ViewModel;
+
+public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager httpClientManager) : ObservableObject
 {
-    private readonly ILogger logger;
+    [ObservableProperty]
+    private string selectedStringName;
 
     [ObservableProperty]
-    private SimpleProductStockModel editingSimpleProductStockModel = new SimpleProductStockModel();
+    private SimpleProductModel editingSimpleProductModel;
 
     [ObservableProperty]
-    private List<ProductCategoryModel> productCategories = [];
+    private ObservableCollection<SimpleProductCategoryModel> productCategories;
 
     [ObservableProperty]
-    private ProductCategoryModel selectedProductStockProductCategory;
+    private SimpleProductCategoryModel selectedComboBoxProductCategory;
 
-    [ObservableProperty]
-    private ProductCategoryModel selectedComboBoxProductCategory;
-
-    public ProductEditorViewModel(ILogger<ProductEditorViewModel> logger)
+    public void Init(SimpleProductModel productModel, ObservableCollection<SimpleProductCategoryModel> productCategories)
     {
-        this.logger = logger;
-    }
+        if(productModel is null) 
+        {
+            productModel = new SimpleProductModel(Guid.NewGuid(), string.Empty, string.Empty, 0, null);
+        }
 
-    public void Init(SimpleProductStockModel simpleProductStockModel, List<ProductCategoryModel> productCategories)
-    {
-        this.EditingSimpleProductStockModel = simpleProductStockModel ?? new SimpleProductStockModel();
-
+        this.EditingSimpleProductModel = productModel;
         this.ProductCategories = productCategories;
+
+        if (this.ProductCategories.Any()) 
+        {
+            this.SelectedComboBoxProductCategory = ProductCategories.First();
+        }
+    }
+    
+    [RelayCommand]
+    public async Task AddCategoryAsync(string categoryName)
+    {
+        if (string.IsNullOrWhiteSpace(categoryName) 
+            || ProductCategories.Any(pc => pc.Name == categoryName))
+        {
+            return;
+        }
+
+        var newCategory =  await httpClientManager.AddNewSimpleProductCategoryAsync(categoryName);
+        ProductCategories.Add(newCategory);
+        SelectedComboBoxProductCategory = newCategory;
     }
 
-    // TODO: category changes is not visible for controls
     [RelayCommand]
-    public async Task AddCategoryAsync()
+    public async Task RemoveCategoryAsync()
     {
         if (this.SelectedComboBoxProductCategory is null)
         {
             return;
         }
 
-        this.EditingSimpleProductStockModel.ProductCategories.Add(this.SelectedComboBoxProductCategory);
-    }
-
-    [RelayCommand]
-    public async Task RemoveCategoryAsync()
-    {
-        if (this.SelectedProductStockProductCategory is null)
-        {
-            return;
-        }
-
-        this.EditingSimpleProductStockModel.ProductCategories.Remove(this.SelectedProductStockProductCategory);
+        await httpClientManager.RemoveSimpleProductCategoryAsync(this.SelectedComboBoxProductCategory.Id);
+        this.ProductCategories.Remove(this.SelectedComboBoxProductCategory);
     }
 
     [RelayCommand]
     public async Task SaveExitAsync(Window window)
     {
-        var spm = this.EditingSimpleProductStockModel;
+        this.EditingSimpleProductModel.SimpleProductCategory = SelectedComboBoxProductCategory;
         if (this.IsEveryPropertyValid())
         {
             window.DialogResult = true;
             this.CloseWindow(window);
         }
-    }
-
-    private bool IsEveryPropertyValid()
-    {
-
-        return true;
     }
 
     [RelayCommand]
@@ -83,11 +85,16 @@ public partial class ProductEditorViewModel : ObservableObject
         this.CloseWindow(window);
     }
 
+    private bool IsEveryPropertyValid()
+    {
+        return !EditingSimpleProductModel.Id.Equals(Guid.Empty) ||
+            !string.IsNullOrWhiteSpace(EditingSimpleProductModel.Name) ||
+            !string.IsNullOrWhiteSpace(EditingSimpleProductModel.Description) ||
+            EditingSimpleProductModel.SimpleProductCategory is not null;
+    }
+    
     private void CloseWindow(Window window)
     {
-        if (window != null)
-        {
-            window.Close();
-        }
-    }
+        window?.Close();
+    }       
 }

@@ -16,7 +16,6 @@ public class SimpleProduct
     [Column(TypeName = "decimal(10, 2)")]
     public decimal Price { get; set; }
 
-    //[ForeignKey("SimpleProductCategoryId")]
     public Guid SimpleProductCategoryId { get; set; }
 
     public required SimpleProductCategory SimpleProductCategory { get; set; }

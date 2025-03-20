@@ -2,7 +2,6 @@
 using SimpleProductManager.Services;
 using Microsoft.EntityFrameworkCore;
 using SimpleProductServices.Extensions;
-using SimpleProductServices.Controllers;
 using SimpleProductManager.Services.Entities;
 
 namespace SimpleProductServices.Services;
@@ -27,16 +26,20 @@ public class SimpleProductService(
         return result?.MapToSimpleProductModel();
     }
     
-    public async Task AddSimpleProductAsync(SimpleProductInputModel simpleProductInputModel)
+    public async Task AddSimpleProductAsync(SimpleProductModel simpleProductModel)
     {
-        var simpleProductCategoryModel = dbContext.SimpleProductCategories.FirstOrDefaultAsync(spc => spc.Id == simpleProductInputModel.SimpleProductCategoryId)?.Result;
-        if (simpleProductCategoryModel is null) 
+        if(simpleProductModel.SimpleProductCategory is null) 
         {
-            throw new Exception($"No SimpleProductCategory with SimpleProductCategoryId \'{simpleProductInputModel.SimpleProductCategoryId}\' does not exist.");
+            throw new Exception($"No SimpleProductCategory in SimpleProduct \'{simpleProductModel.Id}\'.");
         }
 
-        var newProduct = simpleProductInputModel.MapToSimpleProduct(Guid.NewGuid(), simpleProductCategoryModel);
+        var simpleProductCategoryEntity = await dbContext.SimpleProductCategories.FirstOrDefaultAsync(spc => spc.Id == simpleProductModel.SimpleProductCategory.Id);
+        if (simpleProductCategoryEntity is null) 
+        {
+            throw new Exception($"No SimpleProductCategory with SimpleProductCategoryId \'{simpleProductModel.SimpleProductCategory}\' does not exist.");
+        }
 
+        var newProduct = simpleProductModel.MapToSimpleProduct(simpleProductCategoryEntity);
         dbContext.SimpleProducts.Add(newProduct);
         await dbContext.SaveChangesAsync();
 
