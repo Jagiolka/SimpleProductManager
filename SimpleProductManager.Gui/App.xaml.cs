@@ -1,13 +1,13 @@
-﻿using SimpleProductManager.Data;
-
-namespace SimpleProductManager.Gui;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using SimpleProductManager.Gui.Manager;
 using SimpleProductManager.Gui.View;
 using SimpleProductManager.Gui.ViewModel;
 using System.Windows;
+
+namespace SimpleProductManager.Gui;
 
 public partial class App : Application
 {
@@ -16,31 +16,32 @@ public partial class App : Application
     public App()
     {
         host = Host.CreateDefaultBuilder()
-          .ConfigureAppConfiguration((context, builder) =>
-          {
-              var env = context.HostingEnvironment.EnvironmentName;
-              builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                       .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
-          })
-          .ConfigureServices((context, services) =>
-          {
-              services.AddLogging();
-              services.AddScoped<IHttpClientManager, HttpClientManager>();
+            .UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration).Enrich.FromLogContext())
+            .ConfigureAppConfiguration((context, builder) =>
+            {
+                var env = context.HostingEnvironment.EnvironmentName;
+                builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-              services.AddScoped<MainWindowViewModel>();
-              services.AddScoped<ProductEditorViewModel>();
+            })
+            .ConfigureServices((context, services) =>
+            {
+                services.AddScoped<IHttpClientManager, HttpClientManager>();
 
-              services.AddSingleton<MainWindow>(provider => new MainWindow
-              {
-                  DataContext = provider.GetRequiredService<MainWindowViewModel>()
-              });
+                services.AddScoped<MainWindowViewModel>();
+                services.AddScoped<ProductEditorViewModel>();
 
-              services.AddTransient<ProductEditorWindow>(provider => new ProductEditorWindow 
-              {
-                  DataContext = provider.GetRequiredService<ProductEditorViewModel>()
-              });
-          })
-          .Build();
+                services.AddSingleton<MainWindow>(provider => new MainWindow
+                {
+                    DataContext = provider.GetRequiredService<MainWindowViewModel>()
+                });
+
+                services.AddTransient<ProductEditorWindow>(provider => new ProductEditorWindow
+                {
+                    DataContext = provider.GetRequiredService<ProductEditorViewModel>()
+                });
+            })
+            .Build();
     }
 
     protected override async void OnStartup(StartupEventArgs e)
