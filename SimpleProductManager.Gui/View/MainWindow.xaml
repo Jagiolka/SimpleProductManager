@@ -7,7 +7,8 @@
         xmlns:viewModels="clr-namespace:SimpleProductManager.Gui.ViewModel"
         xmlns:converter="clr-namespace:SimpleProductManager.Gui.Converter"
         mc:Ignorable="d"
-        Title="Simple Product Manager" 
+        Title="Simple Product Manager"
+        Icon="../Resources/spmIcon.png"
         Background="WhiteSmoke"
         Height="768" Width="1024"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
