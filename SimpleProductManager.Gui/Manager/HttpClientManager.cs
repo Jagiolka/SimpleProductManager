@@ -9,19 +9,19 @@ using SimpleProductServices.Model;
 
 namespace SimpleProductManager.Gui.Manager;
 
-public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient httpClient = null) : IHttpClientManager
+public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? httpClient = null) : IHttpClientManager
 {
     private readonly ILogger<HttpClientManager> logger = logger;
     private readonly HttpClient httpClient = httpClient ?? new HttpClient();
     // TODO: get ServerUri from appsettings
-    private readonly string ServerUri = "https://localhost:7288";
+    private readonly string serverUri = "https://localhost:7288";
 
     // SimpleProductCategory
     public async Task<List<SimpleProductCategoryModel>> GetAllSimpleProductCategoriesAsync()
     {
         try
         {
-            return await CallHttpClientAndDeserializeAsync<SimpleProductCategoryModel>(httpClient, ServerUri + "/SimpleProductCategory/GetAll");
+            return await CallHttpClientAndDeserializeAsync<SimpleProductCategoryModel>(httpClient, serverUri + "/SimpleProductCategory/GetAll");
         }
         catch (Exception exception)
         {
@@ -31,13 +31,13 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient htt
         return [];
     }
 
-    public async Task<SimpleProductCategoryModel> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName)
+    public async Task<SimpleProductCategoryModel?> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName)
     {
         string service = "/SimpleProductCategory/Add";
         string parameter = "?productCategoryName=";
         try
         {
-            string serverUrl = ServerUri + service + parameter + simpleProductCategoryName;
+            string serverUrl = serverUri + service + parameter + simpleProductCategoryName;
 
             var jsonPayload = JsonConvert.SerializeObject(simpleProductCategoryName);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
@@ -67,7 +67,7 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient htt
 
         try
         {
-            var response = await httpClient.DeleteAsync(ServerUri + service + parameter);
+            var response = await httpClient.DeleteAsync(serverUri + service + parameter);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception exception)
@@ -83,7 +83,7 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient htt
         string service = "/SimpleProduct/GetAll";
         try
         {
-            var response = await httpClient.GetAsync(ServerUri + service);
+            var response = await httpClient.GetAsync(serverUri + service);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<List<SimpleProductModel>>(content) ?? [];
@@ -105,7 +105,7 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient htt
             var json = JsonConvert.SerializeObject(simpleProductModel);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync(ServerUri + service, content);
+            var response = await httpClient.PostAsync(serverUri + service, content);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception exception)
@@ -126,7 +126,7 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient htt
 
         try
         {
-            var response = await httpClient.DeleteAsync(ServerUri + service + parameter);
+            var response = await httpClient.DeleteAsync(serverUri + service + parameter);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception exception)

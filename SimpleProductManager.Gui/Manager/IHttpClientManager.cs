@@ -13,6 +13,6 @@ public interface IHttpClientManager
     Task RemoveSimpleProductAsync(Guid simpleProductId);
 
     Task<List<SimpleProductCategoryModel>> GetAllSimpleProductCategoriesAsync();
-    Task<SimpleProductCategoryModel> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName);
+    Task<SimpleProductCategoryModel?> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName);
     Task RemoveSimpleProductCategoryAsync(Guid simpleProductCategoryId);
 }

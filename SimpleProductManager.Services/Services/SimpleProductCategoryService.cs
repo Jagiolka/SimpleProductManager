@@ -23,7 +23,7 @@ public class SimpleProductCategoryService(ILogger<SimpleProductService> logger, 
         return result?.MapToCategoryModel();
     }
 
-    public async Task<SimpleProductCategoryModel> AddSimpleProductCategoryAsync(string productCategoryName)
+    public async Task<SimpleProductCategoryModel?> AddSimpleProductCategoryAsync(string productCategoryName)
     {
         if (await dbContext.SimpleProductCategories.AnyAsync(spc => spc.Name == productCategoryName))
         {

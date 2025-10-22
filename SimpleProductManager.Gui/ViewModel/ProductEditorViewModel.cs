@@ -20,17 +20,14 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     private SimpleProductModel editingSimpleProductModel;
 
     [ObservableProperty]
-    private ObservableCollection<SimpleProductCategoryModel> productCategories;
+    private ObservableCollection<SimpleProductCategoryModel?> productCategories;
 
     [ObservableProperty]
-    private SimpleProductCategoryModel selectedComboBoxProductCategory;
+    private SimpleProductCategoryModel? selectedComboBoxProductCategory;
 
-    public void Init(SimpleProductModel productModel, ObservableCollection<SimpleProductCategoryModel> productCategories)
+    public void Init(SimpleProductModel? productModel, ObservableCollection<SimpleProductCategoryModel?> productCategories)
     {
-        if(productModel is null) 
-        {
-            productModel = new SimpleProductModel(Guid.NewGuid(), string.Empty, string.Empty, 0, null);
-        }
+        productModel ??= new SimpleProductModel(Guid.NewGuid(), string.Empty, string.Empty, 0, null);
 
         this.EditingSimpleProductModel = productModel;
         this.ProductCategories = productCategories;

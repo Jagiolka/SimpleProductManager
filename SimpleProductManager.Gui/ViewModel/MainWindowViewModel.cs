@@ -22,7 +22,7 @@ public partial class MainWindowViewModel : ObservableObject
     private ProductEditorWindow dialogWindow;
 
     [ObservableProperty]
-    private ObservableCollection<SimpleProductCategoryModel> productCategories = [];
+    private ObservableCollection<SimpleProductCategoryModel?> productCategories = [];
 
     [ObservableProperty]
     private ObservableCollection<SimpleProductModel> filteredSimpleProductList;
@@ -60,7 +60,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         Task.Run(LoadAllSimpleProductsAsync);
         var productCategoriesList = Task.Run(GetProductCategoriesAsync).Result;
-        this.ProductCategories = new ObservableCollection<SimpleProductCategoryModel>(productCategoriesList);
+        this.ProductCategories = new ObservableCollection<SimpleProductCategoryModel?>(productCategoriesList);
     }
 
     [RelayCommand]
