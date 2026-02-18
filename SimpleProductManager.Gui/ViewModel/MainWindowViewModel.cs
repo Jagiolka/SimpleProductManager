@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using WpfArchiver.Ressources;
 using ILogger = Serilog.ILogger;
 
@@ -20,14 +21,18 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IServiceProvider serviceProvider;
     private readonly IHttpClientManager httpClientManager;
     private ProductEditorWindow dialogWindow;
+    
+    [ObservableProperty]
+    private string errorMessage;
+    private readonly DispatcherTimer errorMessageTimer;
 
     [ObservableProperty]
     private ObservableCollection<SimpleProductCategoryModel?> productCategories = [];
 
     [ObservableProperty]
-    private ObservableCollection<SimpleProductModel> filteredSimpleProductList;
+    private ObservableCollection<SimpleProductModel> filteredSimpleProductList; // SimpleProductModelList filtered by simpleProductListFilterText
 
-    private ObservableCollection<SimpleProductModel> simpleProductModelList;
+    private ObservableCollection<SimpleProductModel> simpleProductModelList;    // unfiltered list of SimpleProductModel
     public ObservableCollection<SimpleProductModel> SimpleProductModelList
     {
         get => this.simpleProductModelList;
@@ -57,6 +62,7 @@ public partial class MainWindowViewModel : ObservableObject
         this.FilteredSimpleProductList = [];
 
         this.dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
+        this.errorMessageTimer = InitErrorMessageTimer(10);
 
         Task.Run(LoadAllSimpleProductsAsync);
         var productCategoriesList = Task.Run(GetProductCategoriesAsync).Result;
@@ -64,16 +70,17 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task LoadProductListAsync()
+    private async Task LoadProductListAsync()
     {
-        var loadedProductList = await this.httpClientManager.GetAllSimpleProductAsync();
-        this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(loadedProductList);
+        var response = await this.httpClientManager.GetAllSimpleProductAsync();
+        ShowTemporaryErrorMessage(response.Item1);
+        this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(response.Item2);
 
         this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_LoadProducts, this.FilteredSimpleProductList.Count));
     }
 
     [RelayCommand]
-    public async Task AddSimpleProductAsync()
+    private async Task AddSimpleProductAsync()
     {
         dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
 
@@ -90,7 +97,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task EditSimpleProductAsync(SimpleProductModel editingSimpleProduct)
+    private async Task EditSimpleProductAsync(SimpleProductModel editingSimpleProduct)
     {
         if (editingSimpleProduct is null)
         {
@@ -106,7 +113,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (dialogResult)
         {            
-            await this.httpClientManager.UpdateSimpleProductAsync(editingSimpleProduct);
+            var errorMessage = await this.httpClientManager.UpdateSimpleProductAsync(editingSimpleProduct);
             this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_EditProduct, editingSimpleProduct.Id));
         }
     }
@@ -135,15 +142,46 @@ public partial class MainWindowViewModel : ObservableObject
                 .ToList());
     }
 
-    private async Task<List<SimpleProductCategoryModel>> GetProductCategoriesAsync() 
+    private async Task<List<SimpleProductCategoryModel>> GetProductCategoriesAsync()
     {
-        return await this.httpClientManager.GetAllSimpleProductCategoriesAsync();
+        var response = await this.httpClientManager.GetAllSimpleProductCategoriesAsync();
+        ShowTemporaryErrorMessage(response.Item1);
+        var simpleProductCategoryModelList = response.Item2;
+        
+        return simpleProductCategoryModelList;
     }
 
     private async Task LoadAllSimpleProductsAsync()
     {
-        var loadedProductList = await this.httpClientManager.GetAllSimpleProductAsync();
-        this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(loadedProductList);
+        var response = await this.httpClientManager.GetAllSimpleProductAsync();
+        ShowTemporaryErrorMessage(response.Item1);
+        this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(response.Item2);
     }
-    
+
+    private void ShowTemporaryErrorMessage(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+        
+        ErrorMessage = $"[{DateTime.Now.ToShortTimeString()}] - {message}";
+        errorMessageTimer.Stop();
+        errorMessageTimer.Start();
+    }
+
+    private DispatcherTimer InitErrorMessageTimer(int timerIntervalInSeconds)
+    {
+        var dispatcherTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(10)
+        };
+        dispatcherTimer.Tick += (s, e) =>
+        {
+            dispatcherTimer.Stop();
+            ErrorMessage = string.Empty;
+        };
+        
+        return dispatcherTimer;
+    }
 }

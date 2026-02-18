@@ -39,7 +39,7 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     }
     
     [RelayCommand]
-    public async Task AddCategoryAsync(string categoryName)
+    private async Task AddCategoryAsync(string categoryName)
     {
         if (string.IsNullOrWhiteSpace(categoryName) 
             || ProductCategories.Any(pc => pc.Name == categoryName))
@@ -47,13 +47,15 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
             return;
         }
 
-        var newCategory =  await httpClientManager.AddNewSimpleProductCategoryAsync(categoryName);
-        ProductCategories.Add(newCategory);
-        SelectedComboBoxProductCategory = newCategory;
+        var response =  await httpClientManager.AddNewSimpleProductCategoryAsync(categoryName);
+        
+        // string errorMessage = response.Item1;
+        ProductCategories.Add(response.Item2);
+        SelectedComboBoxProductCategory = response.Item2;
     }
 
     [RelayCommand]
-    public async Task RemoveCategoryAsync()
+    private async Task RemoveCategoryAsync()
     {
         if (this.SelectedComboBoxProductCategory is null)
         {
@@ -65,21 +67,21 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     }
 
     [RelayCommand]
-    public async Task SaveExitAsync(Window window)
+    private async Task SaveExitAsync(Window window)
     {
         this.EditingSimpleProductModel.SimpleProductCategory = SelectedComboBoxProductCategory;
         if (this.IsEveryPropertyValid())
         {
             window.DialogResult = true;
-            this.CloseWindow(window);
+            CloseWindow(window);
         }
     }
 
     [RelayCommand]
-    public async Task CancelExitAsync(Window window)
+    private async Task CancelExitAsync(Window window)
     {
         window.DialogResult = false;
-        this.CloseWindow(window);
+        CloseWindow(window);
     }
 
     private bool IsEveryPropertyValid()
@@ -90,7 +92,7 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
             EditingSimpleProductModel.SimpleProductCategory is not null;
     }
     
-    private void CloseWindow(Window window)
+    private static void CloseWindow(Window window)
     {
         window?.Close();
     }       

@@ -33,7 +33,7 @@ public partial class App : Application
 
                 services.AddSingleton<MainWindow>(provider => new MainWindow
                 {
-                    DataContext = provider.GetRequiredService<MainWindowViewModel>()
+                    DataContext = provider.GetRequiredService<MainWindowViewModel>(),
                 });
 
                 services.AddTransient<ProductEditorWindow>(provider => new ProductEditorWindow

@@ -11,30 +11,33 @@ namespace SimpleProductManager.Gui.Manager;
 
 public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? httpClient = null) : IHttpClientManager
 {
-    private readonly ILogger<HttpClientManager> logger = logger;
     private readonly HttpClient httpClient = httpClient ?? new HttpClient();
-    // TODO: get ServerUri from appsettings
     private readonly string serverUri = "https://localhost:7288";
 
     // SimpleProductCategory
-    public async Task<List<SimpleProductCategoryModel>> GetAllSimpleProductCategoriesAsync()
+    public async Task<(string errorMessage, List<SimpleProductCategoryModel>)> GetAllSimpleProductCategoriesAsync()
     {
+        var service = "/SimpleProductCategory/GetAll";
+        var errorMessage = string.Empty;
         try
         {
-            return await CallHttpClientAndDeserializeAsync<SimpleProductCategoryModel>(httpClient, serverUri + "/SimpleProductCategory/GetAll");
+            return (errorMessage, await this.CallGetHttpClientAndDeserializeAsync<SimpleProductCategoryModel>(httpClient, serverUri + service));
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, exception.Message); 
+            logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
 
-        return [];
+        return (errorMessage, []);
     }
 
-    public async Task<SimpleProductCategoryModel?> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName)
+    public async Task<(string errorMessage, SimpleProductCategoryModel? result)> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName)
     {
-        string service = "/SimpleProductCategory/Add";
-        string parameter = "?productCategoryName=";
+        var service = "/SimpleProductCategory/Add";
+        var parameter = "?productCategoryName=";
+        var errorMessage = string.Empty;
+        
         try
         {
             string serverUrl = serverUri + service + parameter + simpleProductCategoryName;
@@ -47,23 +50,24 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? ht
 
             response.EnsureSuccessStatusCode();
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+            var responseBody = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<SimpleProductCategoryModel>(responseBody);
 
-            return result;
+            return (errorMessage, result);
         }
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
 
-        return null;
+        return (errorMessage, null);
     }
 
     public async Task RemoveSimpleProductCategoryAsync(Guid simpleProductCategoryId)
     {
-        string service = $"/SimpleProductCategory/RemoveByProductCategoryId";
-        string parameter = $"?simpleProductCategoryId={simpleProductCategoryId}";
+        var service = $"/SimpleProductCategory/RemoveByProductCategoryId";
+        var parameter = $"?simpleProductCategoryId={simpleProductCategoryId}";
 
         try
         {
@@ -78,27 +82,30 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? ht
 
 
     // SimpleProduct
-    public async Task<List<SimpleProductModel>> GetAllSimpleProductAsync()
+    public async Task<(string errorMessage, List<SimpleProductModel>)> GetAllSimpleProductAsync()
     {
-        string service = "/SimpleProduct/GetAll";
+        var service = "/SimpleProduct/GetAll";
+        var errorMessage = string.Empty;
         try
         {
             var response = await httpClient.GetAsync(serverUri + service);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<List<SimpleProductModel>>(content) ?? [];
+            return (errorMessage, JsonConvert.DeserializeObject<List<SimpleProductModel>>(content) ?? []);
         }
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
-
-        return [];
+        
+        return (errorMessage, []);       
     }
 
-    public async Task AddNewSimpleProductAsync(SimpleProductModel simpleProductModel)
+    public async Task<string> AddNewSimpleProductAsync(SimpleProductModel simpleProductModel)
     {
-        string service = "/SimpleProduct/Add";
+        var service = "/SimpleProduct/Add";
+        var errorMessage = string.Empty;
 
         try
         {
@@ -111,19 +118,25 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? ht
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
+        
+        return errorMessage;
     }
 
-    public async Task UpdateSimpleProductAsync(SimpleProductModel simpleProductModel)
+    public async Task<string> UpdateSimpleProductAsync(SimpleProductModel simpleProductModel)
     {
+        string errorMessage = string.Empty;
+        return errorMessage;
         // TODO: update simpleProduct
     }
 
-    public async Task RemoveSimpleProductAsync(Guid simpleProductId)
+    public async Task<string> RemoveSimpleProductAsync(Guid simpleProductId)
     {
-        string service = $"/SimpleProduct/RemoveBySimpleProductId";
-        string parameter = $"?simpleProductId={simpleProductId}";
-
+        var service = $"/SimpleProduct/RemoveBySimpleProductId";
+        var parameter = $"?simpleProductId={simpleProductId}";
+        string errorMessage = string.Empty;
+        
         try
         {
             var response = await httpClient.DeleteAsync(serverUri + service + parameter);
@@ -132,14 +145,17 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? ht
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
+        
+        return errorMessage;
     }
 
-    private async Task<List<T>> CallHttpClientAndDeserializeAsync<T>(HttpClient httpClient, string url)
+    private async Task<List<T>> CallGetHttpClientAndDeserializeAsync<T>(HttpClient httpClient, string url)
     {
         var response = await httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<List<T>>(content) ?? new List<T>();
+        return JsonConvert.DeserializeObject<List<T>>(content) ?? [];
     }
 }
