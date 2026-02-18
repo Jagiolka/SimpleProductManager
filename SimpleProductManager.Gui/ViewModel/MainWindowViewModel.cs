@@ -24,7 +24,6 @@ public partial class MainWindowViewModel : ObservableObject
     
     [ObservableProperty]
     private string errorMessage;
-    private readonly DispatcherTimer errorMessageTimer;
 
     [ObservableProperty]
     private ObservableCollection<SimpleProductCategoryModel?> productCategories = [];
@@ -62,7 +61,6 @@ public partial class MainWindowViewModel : ObservableObject
         this.FilteredSimpleProductList = [];
 
         this.dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
-        this.errorMessageTimer = InitErrorMessageTimer(10);
 
         Task.Run(LoadAllSimpleProductsAsync);
         var productCategoriesList = Task.Run(GetProductCategoriesAsync).Result;
@@ -72,6 +70,8 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadProductListAsync()
     {
+        ShowTemporaryErrorMessage("TÖST");
+        
         var response = await this.httpClientManager.GetAllSimpleProductAsync();
         ShowTemporaryErrorMessage(response.Item1);
         this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(response.Item2);
@@ -166,22 +166,5 @@ public partial class MainWindowViewModel : ObservableObject
         }
         
         ErrorMessage = $"[{DateTime.Now.ToShortTimeString()}] - {message}";
-        errorMessageTimer.Stop();
-        errorMessageTimer.Start();
-    }
-
-    private DispatcherTimer InitErrorMessageTimer(int timerIntervalInSeconds)
-    {
-        var dispatcherTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(10)
-        };
-        dispatcherTimer.Tick += (s, e) =>
-        {
-            dispatcherTimer.Stop();
-            ErrorMessage = string.Empty;
-        };
-        
-        return dispatcherTimer;
     }
 }

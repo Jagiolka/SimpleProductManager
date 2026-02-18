@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:SimpleProductManager.Gui"
         xmlns:viewModels="clr-namespace:SimpleProductManager.Gui.ViewModel"
         xmlns:converter="clr-namespace:SimpleProductManager.Gui.Converter"
+        xmlns:view="clr-namespace:SimpleProductManager.Gui.View"
         mc:Ignorable="d"
         Title="Simple Product Manager"
         Icon="../Resources/spmIcon.png"
@@ -77,13 +78,7 @@
             
             <Button Grid.Column="0" Content="Lade Daten" Command="{Binding LoadProductListCommand}" Width="100" Style="{StaticResource ButtonStandard}" />            
             <Button Grid.Column="1" Content="Neu" Command="{Binding AddSimpleProductCommand}" Width="75" Style="{StaticResource ButtonStandard}" />
-            <Label Grid.Column="2" x:Name="ErrorLabel"
-                   Content="{Binding ErrorMessage}"
-                   Foreground="White"
-                   Background="#ff4E4E"
-                   HorizontalContentAlignment="Left"
-            />
-            
+            <view:LogLabel LogMessage="{Binding ErrorMessage}" Grid.Column="2" />
         </Grid>
         
         <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal">
