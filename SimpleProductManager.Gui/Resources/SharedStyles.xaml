@@ -47,9 +47,9 @@
   </Style>
   
   <Style TargetType="TextBox">
-    <Setter Property="Padding" Value="{StaticResource StandardPadding}" />
+    <Setter Property="Padding" Value="5,0,5,0" />
     <Setter Property="Margin" Value="5" />
-    <Setter Property="Background" Value="White" />
+    <Setter Property="Background" Value="WhiteSmoke" />
     <Setter Property="Foreground" Value="#333333" />
     <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />

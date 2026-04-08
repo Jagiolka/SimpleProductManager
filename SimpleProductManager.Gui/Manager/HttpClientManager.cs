@@ -12,7 +12,7 @@ namespace SimpleProductManager.Gui.Manager;
 public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? httpClient = null) : IHttpClientManager
 {
     private readonly HttpClient httpClient = httpClient ?? new HttpClient();
-    private readonly string serverUri = "https://localhost:7288";
+    private readonly string serverUri = "https://localhost:44318";
 
     // SimpleProductCategory
     public async Task<(string errorMessage, List<SimpleProductCategoryModel>)> GetAllSimpleProductCategoriesAsync()

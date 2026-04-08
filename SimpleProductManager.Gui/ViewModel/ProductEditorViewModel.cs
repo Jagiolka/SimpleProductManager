@@ -3,97 +3,179 @@ using CommunityToolkit.Mvvm.Input;
 using SimpleProductManager.Gui.Manager;
 using SimpleProductServices.Model;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using ILogger = Serilog.ILogger;
 
 namespace SimpleProductManager.Gui.ViewModel;
 
+using ILogger = Serilog.ILogger;
+
 public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager httpClientManager) : ObservableObject
 {
+    [ObservableProperty] 
+    private SimpleProductModel editingSimpleProductModel; 
+    // new SimpleProductModel(new Guid(), string.Empty, string.Empty, 0, new SimpleProductCategoryModel(new Guid(), string.Empty));
+
+    
+    // ComboBoxProductCategories - ItemsSource
+    [ObservableProperty] 
+    private ObservableCollection<SimpleProductCategoryModel>? productCategories = [];
+    
+    // ComboBoxProductCategories - SelectedItem
     [ObservableProperty]
-    private string selectedStringName;
+    private SimpleProductCategoryModel? selectedProductCategory;
+    
+    [ObservableProperty]
+    private string selectedStringName = string.Empty;
+    
+    
+    [ObservableProperty]
+    private Dictionary<string, string> fieldErrors = new();
 
     [ObservableProperty]
-    private SimpleProductModel editingSimpleProductModel;
+    private bool hasErrors;
+    
 
-    [ObservableProperty]
-    private ObservableCollection<SimpleProductCategoryModel?> productCategories;
-
-    [ObservableProperty]
-    private SimpleProductCategoryModel? selectedComboBoxProductCategory;
-
-    public void Init(SimpleProductModel? productModel, ObservableCollection<SimpleProductCategoryModel?> productCategories)
+    /// <summary>
+    /// initializes the product editor with a product model
+    /// </summary>
+    /// <param name="productModel">Product model to be edited. Will be created anew if NULL.</param>
+    public async Task InitProductEditorAsync(SimpleProductModel productModel)
     {
-        productModel ??= new SimpleProductModel(Guid.NewGuid(), string.Empty, string.Empty, 0, null);
+        await RefreshProductCategoryAsync();
 
-        this.EditingSimpleProductModel = productModel;
-        this.ProductCategories = productCategories;
-
-        if (this.ProductCategories.Any()) 
-        {
-            this.SelectedComboBoxProductCategory = ProductCategories.First();
-        }
+        EditingSimpleProductModel = new SimpleProductModel(
+            productModel.Id,
+            productModel.Name,
+            productModel.Description,
+            productModel.Price,
+            productModel.SimpleProductCategory);
+        
+        ClearErrors();
     }
     
     [RelayCommand]
     private async Task AddCategoryAsync(string categoryName)
     {
-        if (string.IsNullOrWhiteSpace(categoryName) 
-            || ProductCategories.Any(pc => pc.Name == categoryName))
+        if (string.IsNullOrWhiteSpace(categoryName))
         {
             return;
         }
 
-        var response =  await httpClientManager.AddNewSimpleProductCategoryAsync(categoryName);
+        // category always exists?
+        if (ProductCategories.Any(spc => spc.Name == categoryName))
+        {
+            return;
+        }
         
-        // string errorMessage = response.Item1;
-        ProductCategories.Add(response.Item2);
-        SelectedComboBoxProductCategory = response.Item2;
+        var (errorMessage, result) = await httpClientManager.AddNewSimpleProductCategoryAsync(categoryName);
+        
+        if (result != null)
+        {
+            await RefreshProductCategoryAsync();
+            SelectedProductCategory = ProductCategories!.First(pc => pc.Name == categoryName);
+        }
     }
-
+    
     [RelayCommand]
     private async Task RemoveCategoryAsync()
     {
-        if (this.SelectedComboBoxProductCategory is null)
+        if (SelectedProductCategory == null)
         {
             return;
         }
-
-        await httpClientManager.RemoveSimpleProductCategoryAsync(this.SelectedComboBoxProductCategory.Id);
-        this.ProductCategories.Remove(this.SelectedComboBoxProductCategory);
+    
+        await httpClientManager.RemoveSimpleProductCategoryAsync(SelectedProductCategory.Id);
+        await RefreshProductCategoryAsync();
     }
-
+    
     [RelayCommand]
     private async Task SaveExitAsync(Window window)
     {
-        this.EditingSimpleProductModel.SimpleProductCategory = SelectedComboBoxProductCategory;
-        if (this.IsEveryPropertyValid())
+        if (EditingSimpleProductModel.Id == Guid.Empty)
         {
+            AddFieldError(nameof(SimpleProductModel.Id), "Id ist erforderlich");
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(EditingSimpleProductModel.Name))
+        {
+            AddFieldError(nameof(SimpleProductModel.Name), "Name ist erforderlich");
+            return;
+        }
+
+        if (EditingSimpleProductModel.Price < 0)
+        {
+            AddFieldError(nameof(SimpleProductModel.Price), "Preis darf nicht negativ sein");
+            return;
+        }
+        
+
+        try
+        {
+            // Hier könnte die API-Anfrage erfolgen
+            await Task.CompletedTask;
             window.DialogResult = true;
-            CloseWindow(window);
+            window.Close();
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "Fehler beim Speichern");
+            AddFieldError("general", "Fehler beim Speichern: " + ex.Message);
         }
     }
 
     [RelayCommand]
-    private async Task CancelExitAsync(Window window)
+    private void CancelExit(Window window)
     {
         window.DialogResult = false;
-        CloseWindow(window);
-    }
-
-    private bool IsEveryPropertyValid()
-    {
-        return !EditingSimpleProductModel.Id.Equals(Guid.Empty) ||
-            !string.IsNullOrWhiteSpace(EditingSimpleProductModel.Name) ||
-            !string.IsNullOrWhiteSpace(EditingSimpleProductModel.Description) ||
-            EditingSimpleProductModel.SimpleProductCategory is not null;
+        window.Close();
     }
     
-    private static void CloseWindow(Window window)
+    /// <summary>
+    /// Load all product categories from the API.
+    /// </summary>
+    private async Task<List<SimpleProductCategoryModel>> LoadProductCategoriesAsync()
     {
-        window?.Close();
-    }       
+        var (errorMessage, categories) = await httpClientManager.GetAllSimpleProductCategoriesAsync();
+    
+        if (!string.IsNullOrEmpty(errorMessage))
+        {
+            FieldErrors.Add("Fehler beim Laden der Kategorien", $"Fehler beim Laden der Kategorien: {errorMessage}");
+            
+            return [];
+        }
+    
+        return categories;
+    }
+
+    private async Task RefreshProductCategoryAsync()
+    {
+        var productCategoryList = await LoadProductCategoriesAsync();
+        this.ProductCategories = new ObservableCollection<SimpleProductCategoryModel>(productCategoryList);
+
+        // set SelectedItem
+        if (this.ProductCategories.Any())
+        {
+            SelectedProductCategory = ProductCategories[0];
+        }
+    }
+
+    private void AddFieldError(string fieldName, string errorMessage)
+    {
+        FieldErrors[fieldName] = errorMessage;
+        HasErrors = FieldErrors.Count > 0;
+        OnPropertyChanged(nameof(FieldErrors));
+    }
+
+    private void ClearErrors()
+    {
+        FieldErrors.Clear();
+        HasErrors = false;
+        OnPropertyChanged(nameof(FieldErrors));
+    }
 }

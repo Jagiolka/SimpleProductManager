@@ -5,17 +5,17 @@ using System.Windows.Media;
 
 namespace SimpleProductManager.Gui.View;
 
-public partial class LogLabel : UserControl
+public partial class LogControl : UserControl
 {
     public int SwitchDelayInSeconds { get; set; } = 5;
-    
-    public LogLabel()
+
+    public LogControl()
     {
         InitializeComponent();
     }
-    
+
     public static readonly DependencyProperty LogMessageProperty =
-        DependencyProperty.Register(nameof(LogMessage), typeof(string), typeof(LogLabel), 
+        DependencyProperty.Register(nameof(LogMessage), typeof(string), typeof(LogControl), 
             new PropertyMetadata(string.Empty, OnLogMessageChanged));
 
     public string LogMessage
@@ -26,9 +26,9 @@ public partial class LogLabel : UserControl
 
     private static async void OnLogMessageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is LogLabel control && !string.IsNullOrEmpty(e.NewValue as string))
+        if (d is LogControl ctrl && !string.IsNullOrEmpty(e.NewValue as string))
         {
-            await control.ShowLogVisuals();
+            await ctrl.ShowLogVisuals();
         }
     }
 
@@ -36,9 +36,9 @@ public partial class LogLabel : UserControl
     {
         BackgroundBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff4E4E"));
         LogText.Foreground = Brushes.White;
-        
+
         await Task.Delay(SwitchDelayInSeconds * 1000);
-        
+
         LogMessage = string.Empty;
         BackgroundBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("WhiteSmoke"));
         LogText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#000000"));

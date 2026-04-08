@@ -23,9 +23,23 @@
 
   <ItemGroup>
     <None Remove="Resources\spmIcon.png" />
-    <Resource Include="Resources\spmIcon.png">
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Icons\spmIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Icons\i_edit-itemBlue_F12.png" />
+    <Content Include="Resources\Icons\i_edit-itemBlue_F12.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\Icons\VSO_Cancel_16x.png" />
+    <Content Include="Resources\Icons\VSO_Cancel_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
