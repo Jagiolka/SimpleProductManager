@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SimpleProductManager.Services;
 using SimpleProductServices.Controllers;
+using SimpleProductServices.Migrations.DatabaseSeeder;
 using SimpleProductServices.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -46,6 +47,9 @@ if (app.Environment.IsDevelopment())
   app.UseSwagger();
   app.UseSwaggerUI();
 }
+
+// Seed test data
+await DatabaseSeeder.SeedAsync(app.Services, app.Configuration);
 
 app.UseSerilogRequestLogging();
 app.UseRouting();
