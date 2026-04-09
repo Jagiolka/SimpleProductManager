@@ -5,7 +5,6 @@ using SimpleProductServices.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,9 +16,7 @@ using ILogger = Serilog.ILogger;
 public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager httpClientManager) : ObservableObject
 {
     [ObservableProperty] 
-    private SimpleProductModel editingSimpleProductModel; 
-    // new SimpleProductModel(new Guid(), string.Empty, string.Empty, 0, new SimpleProductCategoryModel(new Guid(), string.Empty));
-
+    private SimpleProductModel? editingSimpleProductModel; 
     
     // ComboBoxProductCategories - ItemsSource
     [ObservableProperty] 
@@ -32,13 +29,8 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     [ObservableProperty]
     private string selectedStringName = string.Empty;
     
-    
     [ObservableProperty]
-    private Dictionary<string, string> fieldErrors = new();
-
-    [ObservableProperty]
-    private bool hasErrors;
-    
+    private string errorMessage = string.Empty;
 
     /// <summary>
     /// initializes the product editor with a product model
@@ -46,6 +38,8 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     /// <param name="productModel">Product model to be edited. Will be created a new if NULL.</param>
     public async Task InitProductEditorAsync(SimpleProductModel productModel)
     {
+        this.ErrorMessage = string.Empty;
+        
         await RefreshProductCategoryAsync();
 
         EditingSimpleProductModel = new SimpleProductModel(
@@ -54,8 +48,6 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
             productModel.Description,
             productModel.Price,
             productModel.SimpleProductCategory);
-        
-        ClearErrors();
     }
     
     [RelayCommand]
@@ -63,16 +55,28 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     {
         if (string.IsNullOrWhiteSpace(categoryName))
         {
+            LogError("Name der Kategorie muss angegeben werden.");
             return;
         }
 
-        if (ProductCategories != null && 
-            ProductCategories.Any(spc => spc.Name == categoryName))
+        if (ProductCategories == null)
         {
+            LogError("Kategorien sind NULL.");
             return;
         }
         
-        var (errorMessage, result) = await httpClientManager.AddNewSimpleProductCategoryAsync(categoryName);
+        if (ProductCategories!.Any(spc => spc.Name == categoryName))
+        {
+            LogError("Name der Kategorie existiert bereits.");
+            return;
+        }
+        
+        var (errorMsg, result) = await httpClientManager.AddNewSimpleProductCategoryAsync(categoryName);
+
+        if (!string.IsNullOrEmpty(errorMsg))
+        {
+            LogError(errorMsg);
+        }
         
         if (result != null)
         {
@@ -98,34 +102,31 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     {
         if (EditingSimpleProductModel.Id == Guid.Empty)
         {
-            AddFieldError(nameof(SimpleProductModel.Id), "Id ist erforderlich");
+            LogError("Id ist erforderlich");
             return;
         }
         
         if (string.IsNullOrWhiteSpace(EditingSimpleProductModel.Name))
         {
-            AddFieldError(nameof(SimpleProductModel.Name), "Name ist erforderlich");
+            LogError("Name ist erforderlich");
             return;
         }
 
         if (EditingSimpleProductModel.Price < 0)
         {
-            AddFieldError(nameof(SimpleProductModel.Price), "Preis darf nicht negativ sein");
+            LogError("Preis darf nicht negativ sein");
             return;
         }
         
-
         try
         {
-            // Hier könnte die API-Anfrage erfolgen
             await Task.CompletedTask;
             window.DialogResult = true;
             window.Close();
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Fehler beim Speichern");
-            AddFieldError("general", "Fehler beim Speichern: " + ex.Message);
+            LogError("Fehler beim Speichern: " + ex.Message);
         }
     }
 
@@ -141,11 +142,11 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     /// </summary>
     private async Task<List<SimpleProductCategoryModel>> LoadProductCategoriesAsync()
     {
-        var (errorMessage, categories) = await httpClientManager.GetAllSimpleProductCategoriesAsync();
+        var (message, categories) = await httpClientManager.GetAllSimpleProductCategoriesAsync();
     
-        if (!string.IsNullOrEmpty(errorMessage))
+        if (!string.IsNullOrEmpty(message))
         {
-            FieldErrors.Add("Fehler beim Laden der Kategorien", $"Fehler beim Laden der Kategorien: {errorMessage}");
+            LogError($"Fehler beim Laden der Kategorien: {message}");
             
             return [];
         }
@@ -165,17 +166,15 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
         }
     }
 
-    private void AddFieldError(string fieldName, string errorMessage)
+    private void LogError(string message)
     {
-        FieldErrors[fieldName] = errorMessage;
-        HasErrors = FieldErrors.Count > 0;
-        OnPropertyChanged(nameof(FieldErrors));
-    }
-
-    private void ClearErrors()
-    {
-        FieldErrors.Clear();
-        HasErrors = false;
-        OnPropertyChanged(nameof(FieldErrors));
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+        
+        ErrorMessage = string.Empty;
+        ErrorMessage = $"[{DateTime.Now.ToLongTimeString()}] - {message}";
+        logger.Error(ErrorMessage);
     }
 }

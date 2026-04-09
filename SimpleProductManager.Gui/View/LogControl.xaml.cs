@@ -7,11 +7,12 @@ namespace SimpleProductManager.Gui.View;
 
 public partial class LogControl : UserControl
 {
-    public int SwitchDelayInSeconds { get; set; } = 5;
+    public int SwitchDelayInSeconds { get; set; } = 8;
 
     public LogControl()
     {
         InitializeComponent();
+        Visibility = Visibility.Collapsed;
     }
 
     public static readonly DependencyProperty LogMessageProperty =
@@ -26,21 +27,29 @@ public partial class LogControl : UserControl
 
     private static async void OnLogMessageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is LogControl ctrl && !string.IsNullOrEmpty(e.NewValue as string))
+        if (d is not LogControl ctrl)
         {
-            await ctrl.ShowLogVisuals();
+            return;
         }
+
+        var newMessage = e.NewValue as string;
+
+        if (string.IsNullOrWhiteSpace(newMessage))
+        {
+            ctrl.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        await ctrl.ShowLogVisualsAsync();
     }
 
-    private async Task ShowLogVisuals()
+    private async Task ShowLogVisualsAsync()
     {
+        Visibility = Visibility.Visible;
         BackgroundBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ff4E4E"));
         LogText.Foreground = Brushes.White;
 
         await Task.Delay(SwitchDelayInSeconds * 1000);
-
-        LogMessage = string.Empty;
-        BackgroundBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("WhiteSmoke"));
-        LogText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#000000"));
+        Visibility = Visibility.Collapsed;
     }
 }

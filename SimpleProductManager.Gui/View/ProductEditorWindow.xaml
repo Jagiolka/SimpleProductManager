@@ -8,8 +8,9 @@
         xmlns:converter="clr-namespace:SimpleProductManager.Gui.Converter"
         
         mc:Ignorable="d"
-        Title="ProductEditorWindow" 
+        Title="Product Editor" 
         MinHeight="350" MaxHeight="350" MinWidth="550" MaxWidth="550"
+        Icon="../Resources/Icons/spmIcon.png"
         d:DataContext="{d:DesignInstance viewModels:ProductEditorViewModel}">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -27,7 +28,7 @@
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="15" />
         </Grid.RowDefinitions>
 
@@ -52,45 +53,62 @@
         </TextBox>
         <Label Grid.Row="4" Grid.Column="3" Content="€" />
         
-        <Label Grid.Row="5" Grid.Column="1" Content="Kategorien" />        
+        <Label Grid.Row="5" Grid.Column="1" Content="Kategorien" />
         <ComboBox Name="ComboBoxProductCategories"
-                  Grid.Row="5" Grid.Column="2" Margin="5,3,0,0" 
-                  ItemsSource="{Binding ProductCategories, UpdateSourceTrigger=PropertyChanged}" 
-                  SelectedItem="{Binding SelectedProductCategory, UpdateSourceTrigger=PropertyChanged}" 
-                  DisplayMemberPath="Name" 
+                  Grid.Row="5" Grid.Column="2" Margin="5,3,0,0"
+                  ItemsSource="{Binding ProductCategories, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedItem="{Binding SelectedProductCategory, UpdateSourceTrigger=PropertyChanged}"
                   Text="{Binding SelectedStringName, UpdateSourceTrigger=PropertyChanged}"
+                  TextSearch.TextPath="Name"
                   VerticalAlignment="Center"
-                  IsEditable="True"
-                  >
+                  IsEditable="True">
+            <ComboBox.ItemContainerStyle>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ComboBox.ItemContainerStyle>
+
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="30" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Name}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"
+                                   TextTrimming="CharacterEllipsis"/>
+
+                        <Button Name="ButtonDeleteCategory" 
+                                Grid.Column="1"
+                                Width="20" Height="20" Margin="5,0,0,0" Padding="0"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=DataContext.RemoveCategoryCommand}"
+                                CommandParameter="{Binding}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right">
+                            <Button.Content>
+                                <Image Source="../Resources/Icons/Cancel_16x.png" Width="16" Height="16" />
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
         </ComboBox>
         
-        <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top">
-            <Button Content="+"
-                    VerticalAlignment="Center"
-                    Width="25" Height="25" Margin="0,0,1,5"
-                    Command="{Binding AddCategoryCommand}"
-                    CommandParameter="{Binding SelectedStringName}" />
-            <!-- Style="{StaticResource ButtonStandard}" -->
-            <!-- Grid.Row="5" Grid.Column="3" -->
-            
-            <Button Content="-"
-                    VerticalAlignment="Center" 
-                    Width="25" Height="25" Margin="1,0,0,5"
-                    Command="{Binding RemoveCategoryCommand}"
-                    CommandParameter="{Binding SelectedProductCategory}" />
-            <!-- Style="{StaticResource ButtonStandard}" -->
-            <!-- Grid.Row="5" Grid.Column="4" -->
-        </StackPanel>
+        <Button Name="ButtonAddCategory"
+                Grid.Row="5" Grid.Column="3"
+                VerticalAlignment="Center" HorizontalAlignment="Center"
+                Width="20" Height="20"
+                Command="{Binding AddCategoryCommand}"
+                CommandParameter="{Binding SelectedStringName}">
+            <Button.Content>
+                <Image Source="../Resources/Icons/Add_inverse_16x.png" Width="16" Height="16" />
+            </Button.Content>
+        </Button>
         
-        
-        <!-- <Button Content="+" Grid.Row="5" Grid.Column="3" Height="20" VerticalAlignment="Center" Margin="2"  -->
-        <!--         Command="{Binding AddCategoryCommand}"  -->
-        <!--         CommandParameter="{Binding SelectedStringName}" /> -->
-        <!-- <Button Content="-" Grid.Row="5" Grid.Column="4" Height="20" VerticalAlignment="Center" Margin="2"  -->
-        <!--         Command="{Binding RemoveCategoryCommand}"  -->
-        <!--         CommandParameter="{Binding SelectedComboBoxProductCategory}" /> -->
-
-
         <Grid Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30" />
@@ -114,7 +132,7 @@
                     Command="{Binding CancelExitCommand}" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
             
-            <local:LogControl 
+            <local:LogControl x:Name="LogControlProductEditor"
                 Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,0,0,0" 
                 LogMessage="{Binding ErrorMessage}"  />
         </Grid>

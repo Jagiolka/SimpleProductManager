@@ -11,6 +11,7 @@
         Title="Simple Product Manager"
         Icon="../Resources/Icons/spmIcon.png"
         Background="#f5f9fb"
+        MinWidth="800" MinHeight="480"
         Height="768" Width="1024">
     
     <Grid>
@@ -69,7 +70,7 @@
                             <!-- remove button -->
                             <Button Width="20" Margin="2" Command="{Binding ElementName=DataGridProducts, Path=DataContext.RemoveSimpleProductCommand}" CommandParameter="{Binding}">
                                 <Button.Content>
-                                    <Image Source="../Resources/Icons/VSO_Cancel_16x.png" Width="16" Height="16" />
+                                    <Image Source="../Resources/Icons/Cancel_16x.png" Width="16" Height="16" />
                                 </Button.Content>
                             </Button>
                         </DataTemplate>
