@@ -43,7 +43,7 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
     /// <summary>
     /// initializes the product editor with a product model
     /// </summary>
-    /// <param name="productModel">Product model to be edited. Will be created anew if NULL.</param>
+    /// <param name="productModel">Product model to be edited. Will be created a new if NULL.</param>
     public async Task InitProductEditorAsync(SimpleProductModel productModel)
     {
         await RefreshProductCategoryAsync();
@@ -66,8 +66,8 @@ public partial class ProductEditorViewModel(ILogger logger, IHttpClientManager h
             return;
         }
 
-        // category always exists?
-        if (ProductCategories.Any(spc => spc.Name == categoryName))
+        if (ProductCategories != null && 
+            ProductCategories.Any(spc => spc.Name == categoryName))
         {
             return;
         }
