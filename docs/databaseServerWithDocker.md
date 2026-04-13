@@ -22,7 +22,7 @@ Server=localhost,1433;Database=SimpleProductDatabase;User Id=sa;Password=.saP4ss
 _(da es sich um eine Entwicklungsumgebung handelt => TrustServerCertificate=True;)_
 
 Anmeldedaten im SSMS
-<img src="/Images/Screenshot_ssms_login.jpg" alt="Anmeldung" width="400px" />
+<img src="docs/Images/Screenshot_ssms_login.jpg" alt="Anmeldung" width="400px" />
 
 Aktuell ist die Datenbank antürlich noch leer
 <img src="/Images/Screenshot_ssms_databaseEmpty.jpg" alt="Bilderbeispiel" width="400px" />
