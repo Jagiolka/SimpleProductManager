@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using WpfArchiver.Ressources;
+
 using ILogger = Serilog.ILogger;
 
 namespace SimpleProductManager.Gui.ViewModel;
@@ -20,14 +21,17 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IServiceProvider serviceProvider;
     private readonly IHttpClientManager httpClientManager;
     private ProductEditorWindow dialogWindow;
+    
+    [ObservableProperty]
+    private string errorMessage = string.Empty;
+    
+    [ObservableProperty]
+    private ObservableCollection<SimpleProductCategoryModel?> productCategories = [];
 
     [ObservableProperty]
-    private ObservableCollection<SimpleProductCategoryModel> productCategories = [];
+    private ObservableCollection<SimpleProductModel> filteredSimpleProductList  = []; // SimpleProductModelList filtered by simpleProductListFilterText
 
-    [ObservableProperty]
-    private ObservableCollection<SimpleProductModel> filteredSimpleProductList;
-
-    private ObservableCollection<SimpleProductModel> simpleProductModelList;
+    private ObservableCollection<SimpleProductModel> simpleProductModelList  = [];    // unfiltered list of SimpleProductModel
     public ObservableCollection<SimpleProductModel> SimpleProductModelList
     {
         get => this.simpleProductModelList;
@@ -54,43 +58,48 @@ public partial class MainWindowViewModel : ObservableObject
         this.logger = logger;
         this.serviceProvider = serviceProvider;
         this.httpClientManager = httpClientManager;
-        this.FilteredSimpleProductList = [];
-
+        
+        
         this.dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
 
         Task.Run(LoadAllSimpleProductsAsync);
         var productCategoriesList = Task.Run(GetProductCategoriesAsync).Result;
-        this.ProductCategories = new ObservableCollection<SimpleProductCategoryModel>(productCategoriesList);
+        this.ProductCategories = new ObservableCollection<SimpleProductCategoryModel?>(productCategoriesList!);
     }
 
     [RelayCommand]
-    public async Task LoadProductListAsync()
+    private async Task LoadProductListAsync()
     {
-        var loadedProductList = await this.httpClientManager.GetAllSimpleProductAsync();
-        this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(loadedProductList);
-
-        this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_LoadProducts, this.FilteredSimpleProductList.Count));
+        await LoadAllSimpleProductsAsync();
     }
 
     [RelayCommand]
-    public async Task AddSimpleProductAsync()
+    private async Task AddSimpleProductAsync()
     {
         dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
-
-        var productViewModelDataContext = (ProductEditorViewModel)dialogWindow.DataContext;                
-        productViewModelDataContext.Init(null , ProductCategories);
-        var dialogResult = dialogWindow.ShowDialog() ?? false;
-
-        if (dialogResult)
+        try
         {
-            await this.httpClientManager.AddNewSimpleProductAsync(productViewModelDataContext.EditingSimpleProductModel);
-            await this.LoadAllSimpleProductsAsync();
-            this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_AddProduct, productViewModelDataContext.EditingSimpleProductModel.Id));
-        }
-    }
+            // var spc = new SimpleProductCategoryModel(new Guid(), "TEST");
+            var newGuid = Guid.NewGuid();
+            var newProductModel = new SimpleProductModel(newGuid, string.Empty, string.Empty, 0, null);
+            var productViewModelDataContext = (ProductEditorViewModel)dialogWindow.DataContext;                
+            await productViewModelDataContext.InitProductEditorAsync(newProductModel);
 
+            if (dialogWindow.ShowDialog() == true)
+            {
+                await this.httpClientManager.AddNewSimpleProductAsync(newProductModel);
+                // this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_AddProduct, productViewModelDataContext.EditingSimpleProductModel.Id));
+                await this.LoadAllSimpleProductsAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex.ToString());
+        }       
+    }
+    
     [RelayCommand]
-    public async Task EditSimpleProductAsync(SimpleProductModel editingSimpleProduct)
+    private async Task EditSimpleProductAsync(SimpleProductModel? editingSimpleProduct)
     {
         if (editingSimpleProduct is null)
         {
@@ -100,19 +109,20 @@ public partial class MainWindowViewModel : ObservableObject
         dialogWindow = this.serviceProvider.GetRequiredService<ProductEditorWindow>();
 
         var productViewModelDataContext = (ProductEditorViewModel)dialogWindow.DataContext;
-        productViewModelDataContext.Init(editingSimpleProduct, ProductCategories);
+        productViewModelDataContext.InitProductEditorAsync(editingSimpleProduct);
 
         var dialogResult = dialogWindow.ShowDialog() ?? false;
 
         if (dialogResult)
         {            
-            await this.httpClientManager.UpdateSimpleProductAsync(editingSimpleProduct);
+            var result = await this.httpClientManager.UpdateSimpleProductAsync(editingSimpleProduct);
+            // ShowTemporaryErrorMessage(errorMessage);
             this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_EditProduct, editingSimpleProduct.Id));
         }
     }
 
     [RelayCommand]
-    public async Task RemoveSimpleProductAsync(SimpleProductModel removingSimpleProduct)
+    private async Task RemoveSimpleProductAsync(SimpleProductModel? removingSimpleProduct)
     {
         if (removingSimpleProduct is null)
         { 
@@ -125,25 +135,42 @@ public partial class MainWindowViewModel : ObservableObject
         this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_RemoveProduct, removingSimpleProductId));
     }
     
+    private async Task LoadAllSimpleProductsAsync()
+    {
+        var response = await this.httpClientManager.GetAllSimpleProductAsync();
+        ShowTemporaryErrorMessage(response.Item1);
+        this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(response.Item2);
+
+        this.logger.Information(string.Format(ConstantMessages.MainWindowViewModel_LoadProducts, this.FilteredSimpleProductList.Count));
+    }
+    
     private void SetFilteredSimpleProductList(string filterText)
     {
         this.FilteredSimpleProductList = 
             string.IsNullOrWhiteSpace(filterText)
             ? this.SimpleProductModelList
             : new ObservableCollection<SimpleProductModel>(
-                this.SimpleProductModelList.Where(simpleProductModelList => simpleProductModelList.Name.Contains(filterText))
+                this.SimpleProductModelList.Where(spmList => spmList.Name.Contains(filterText))
                 .ToList());
     }
 
-    private async Task<List<SimpleProductCategoryModel>> GetProductCategoriesAsync() 
+    private async Task<List<SimpleProductCategoryModel>> GetProductCategoriesAsync()
     {
-        return await this.httpClientManager.GetAllSimpleProductCategoriesAsync();
+        var response = await this.httpClientManager.GetAllSimpleProductCategoriesAsync();
+        ShowTemporaryErrorMessage(response.Item1);
+        var simpleProductCategoryModelList = response.Item2;
+        
+        return simpleProductCategoryModelList;
     }
 
-    private async Task LoadAllSimpleProductsAsync()
+    private void ShowTemporaryErrorMessage(string message)
     {
-        var loadedProductList = await this.httpClientManager.GetAllSimpleProductAsync();
-        this.SimpleProductModelList = new ObservableCollection<SimpleProductModel>(loadedProductList);
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+        
+        this.ErrorMessage = $"[{DateTime.Now.ToShortTimeString()}] - {message}";
+        logger.Error(this.ErrorMessage);
     }
-    
 }

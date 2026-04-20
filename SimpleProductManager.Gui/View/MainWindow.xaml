@@ -1,17 +1,19 @@
-﻿<Window x:Class="SimpleProductManager.Gui.MainWindow"
+﻿<Window x:Class="SimpleProductManager.Gui.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleProductManager.Gui"
+        xmlns:view="clr-namespace:SimpleProductManager.Gui.View"
         xmlns:viewModels="clr-namespace:SimpleProductManager.Gui.ViewModel"
         xmlns:converter="clr-namespace:SimpleProductManager.Gui.Converter"
         mc:Ignorable="d"
-        Title="Simple Product Manager" 
-        Background="WhiteSmoke"
-        Height="768" Width="1024"
-        d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
-
+        Title="Simple Product Manager"
+        Icon="../Resources/Icons/spmIcon.png"
+        Background="#f5f9fb"
+        MinWidth="800" MinHeight="480"
+        Height="768" Width="1024">
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="15" />
@@ -19,48 +21,75 @@
             <ColumnDefinition Width="15" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="15" />
+            <RowDefinition Height="20" />
             <RowDefinition Height="30" />
             <RowDefinition Height="*" />
             <RowDefinition Height="30" />
             <RowDefinition Height="15" />
         </Grid.RowDefinitions>
-
-        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-            <Label Content="Filter: " Width="50"/>
-            <TextBox Text="{Binding SimpleProductListFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,5" Width="925" />
-        </StackPanel>
+        
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Label Grid.Column="0" Content="Filter: " />
+            <TextBox Grid.Column="1"
+                     Text="{Binding SimpleProductListFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     HorizontalAlignment="Stretch"
+                     Margin="0,2,0,5"/>
+        </Grid>
         
         <DataGrid Grid.Column="1" Grid.Row="2" 
                   ItemsSource="{Binding FilteredSimpleProductList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                   
                   AutoGenerateColumns="False" IsReadOnly="True"
-                  x:Name="DataGridProducts">
+                  x:Name="DataGridProducts"
+                  Margin="0,5,0,5">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200*" />
-                <DataGridTextColumn Header="Description" Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="150" />
-                <DataGridTextColumn Header="Price" Binding="{Binding Price, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" />
-                <DataGridTextColumn Header="ProductCategoriesText" Binding="{Binding SimpleProductCategory.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="150" />
+                <DataGridTextColumn Header="Beschreibung" Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="150" />
+                <DataGridTextColumn Header="Preis" Binding="{Binding Price, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                <DataGridTextColumn Header="Produktkategorie" Binding="{Binding SimpleProductCategory.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="150" />
 
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="edit" Width="75" Margin="2" Command="{Binding ElementName=DataGridProducts, Path=DataContext.EditSimpleProductCommand}" CommandParameter="{Binding}" />
+                            <!-- edit button -->
+                            <Button Width="20" Margin="2" Command="{Binding ElementName=DataGridProducts, Path=DataContext.EditSimpleProductCommand}" CommandParameter="{Binding}">
+                                <Button.Content>
+                                    <Image Source="pack://application:,,,/Resources/Icons/i_edit-itemBlue_F12.png" Width="16" Height="16" />
+                                </Button.Content>
+                            </Button>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="remove" Width="75" Margin="2" Command="{Binding ElementName=DataGridProducts, Path=DataContext.RemoveSimpleProductCommand}" CommandParameter="{Binding}" />
+                            <!-- remove button -->
+                            <Button Width="20" Margin="2" Command="{Binding ElementName=DataGridProducts, Path=DataContext.RemoveSimpleProductCommand}" CommandParameter="{Binding}">
+                                <Button.Content>
+                                    <Image Source="../Resources/Icons/Cancel_16x.png" Width="16" Height="16" />
+                                </Button.Content>
+                            </Button>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
         
-        <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal">
-            <Button Content="load data" Command="{Binding LoadProductListCommand}" Width="75" Margin="0,0,20,0" />            
-            <Button Content="addNew" Command="{Binding AddSimpleProductCommand}" Width="75" Margin="2" />
-        </StackPanel>
+        <Grid Grid.Column="1" Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="85" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Button Grid.Column="0" Content="Lade Daten" Command="{Binding LoadProductListCommand}" Width="100" Style="{StaticResource ButtonStandard}" />            
+            <Button Grid.Column="1" Content="Neu" Command="{Binding AddSimpleProductCommand}" Width="75" Style="{StaticResource ButtonStandard}" />
+            
+            <view:LogControl LogMessage="{Binding ErrorMessage}" Grid.Column="2" />
+        </Grid>
     </Grid>
 </Window>

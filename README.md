@@ -3,51 +3,58 @@
 ### Beschreibung
 Bei dem SimpleProductManager handelt es sich um eine "Spielwiese" auf C# .Net 9.0.
 
-Der SimpleProdcutManager besteht aus 2 Anwendungsteilen:
-- __Service:__ ASP .Net Core Rest Schnitstellen zur Datenbereitstellung mittels Entity Framework Core. Datenbankstrukturbereitstellung durch Migration.
-- __GUI:__ Anwenderoberfläche mit WPF
-
-### 1. Datenbank-Server mit Docker
-Zur Bereitstellung der Datenbank nutze ich Docker über WSL unter Windows 11.
-
-#### Docker Image
-Um einen MS SQL Server nutzen zu können, müssen wir erst ein Docker Image beziehen.
-Dazu folgende Zeilen in der Docker BASH ausführen (ich nutze dazu das Docker.Desktop Terminal):
-
-__pull image:__
-``` BASH 
-docker pull mcr.microsoft.com/mssql/server:2022-latest
-```
-
-Um aus dem Image ein Container bereitzustellen (damit ein aufrufbaren SQL Server):
-``` BASH
-docker run -dit -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=.saP4ssword' -p 1433:1433 --name sqlServerContainer mcr.microsoft.com/mssql/server:2022-latest
-```
-
-__ConnectionString:__
-```
-Server=localhost,1433;Database=SimpleProductDatabase;User Id=sa;Password=.saP4ssword;TrustServerCertificate=True;
-```
-(da es sich um eine Entwicklungsumgebung handelt => TrustServerCertificate=True;)
-
-### 2. Migration
-Migration-Befehle gebe ich im "Package Manager Console" des "Microsoft Visual Studio" ein.
-
-#### 2.1 Migration Initialisierung
-__!__ _Dieser Schritt ist nur nötig sollten noch keine Migrations-Dateien im Projekt existieren._
+Der SimpleProductManager besteht aus 2 Anwendungsteilen:
+- __REST Service:__
+  - ASP .Net Core Rest Schnitstellen
+  - Datenbereitstellung mittels Entity Framework Core
+  - Datenbankstrukturbereitstellung durch EF-Migration
+    - erstellt Datenbank und Tabellen
+    - "DatabaseSeeder" erstellt auf Wunsch einen Testdatensatz (appsettings.json => "SeedTestData": true)
+- __GUI:__
+  - WPF Anwenderoberfläche
+  - Produktübersicht
+    - Filter Textbox
+    - Tabelleneintrag mit Bearbeitungs- und Löschungs-Button
+    - einfaches ErrorLog-Control
+    - Hinzufügen/Löschen/Bearbeitung von Produkten und Produktkategorien
 
 
-Mit folgendem Befehl wird der Projekt-Ordner "Migrations" angelegt, und die Dateien \<DatenbankName\>ContextModelSnapshot.cs und \<Datum\>_\<DatenbankName\>.cs erstellt. 
-Als Beispiel aus dem Projekt: 
-_20250312204530_Init_SimpleProductDatabase.cs_
-_SimpleProductDatabaseContextModelSnapshot.cs_
-```
-Add-Migration SimpleProductDatabase
-```
+### ProductManager
+<table align="center" >
+  <tr>
+    <td align="center">
+      <img src="/docs/Images/spm01_overview.jpg" alt="SimpleProductManager" width="450px" />
+    </td>
+    <td>
+      <img src="/docs/Images/spm02_overview_filter.jpg" alt="SimpleProductManager with filter" width="450px" />
+    </td>
+    <td>
+      <img src="/docs/Images/spm01_overview_errorMsg.jpg" alt="SimpleProductManager with error" width="450px" />
+    </td>
+  </tr>  
+</table>
 
-#### 2.2 Datenbank erstellen anhand der Migrations-Dateien
-'Update-Database' erstellt/updated die Datenbankstruktur aus den Migrationsdaten in der Datenbank aus den Appsettings.
-__Wichtig:__ In der "Package Manager Console" erst das Default-Projekt auswählen. (hier _SimpleProductManager.Services_)
-```
-Update-Database -verbose
-```
+### ProductEditor
+<table align="center" >
+  <tr>
+    <td align="center">
+      <img src="/docs/Images/spm_productEditor01_Dialog.jpg" alt="ProductEditor dialog" width="450px" />
+    </td>
+    <td>
+      <img src="/docs/Images/spm_productEditor02_categoryControl.jpg" alt="ProductEditor dialog category control" width="450px" />
+    </td>
+    <td>
+      <img src="/docs/Images/spm02_overview_errorMsg.jpg" alt="ProductEditor dialog with error" width="450px" />
+    </td>    
+  </tr>  
+</table>
+
+### Swagger - Services
+<img src="/docs/Images/swagger_SimpleProductManager.Services.jpg" alt="ProductEditor dialog with error" width="450px" />
+
+
+
+### Hilfen zur Ausführung:
+- [Datenbank-Server bereitstellen mit Docker](/docs/databaseServerWithDocker.md)
+- [Datenbank-Migration](/docs/databaseMigration.md)
+

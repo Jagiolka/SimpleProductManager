@@ -1,6 +1,6 @@
-﻿namespace SimpleProductManager.Gui.View;
+﻿using System.Windows;
 
-using System.Windows;
+namespace SimpleProductManager.Gui.View;
 
 public partial class ProductEditorWindow : Window
 {

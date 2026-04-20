@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="SimpleProductManager.Gui.View.LogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root">
+    <Grid>
+        <Border x:Name="BackgroundBorder" 
+                Background="WhiteSmoke" 
+                Padding="2"
+                CornerRadius="4">
+            <TextBlock x:Name="LogText" 
+                       Text="{Binding LogMessage, ElementName=Root}" 
+                       Foreground="#000000" 
+                       TextWrapping="Wrap"
+                       FontWeight="SemiBold"/>
+        </Border>
+    </Grid>
+</UserControl>

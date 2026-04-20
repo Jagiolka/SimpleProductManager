@@ -9,35 +9,38 @@ using SimpleProductServices.Model;
 
 namespace SimpleProductManager.Gui.Manager;
 
-public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient httpClient = null) : IHttpClientManager
+public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient? httpClient = null) : IHttpClientManager
 {
-    private readonly ILogger<HttpClientManager> logger = logger;
     private readonly HttpClient httpClient = httpClient ?? new HttpClient();
-    // TODO: get ServerUri from appsettings
-    private readonly string ServerUri = "https://localhost:7288";
+    private readonly string serverUri = "https://localhost:44318";
 
     // SimpleProductCategory
-    public async Task<List<SimpleProductCategoryModel>> GetAllSimpleProductCategoriesAsync()
+    public async Task<(string errorMessage, List<SimpleProductCategoryModel>)> GetAllSimpleProductCategoriesAsync()
     {
+        var service = "/SimpleProductCategory/GetAll";
+        var errorMessage = string.Empty;
         try
         {
-            return await CallHttpClientAndDeserializeAsync<SimpleProductCategoryModel>(httpClient, ServerUri + "/SimpleProductCategory/GetAll");
+            return (errorMessage, await this.CallGetHttpClientAndDeserializeAsync<SimpleProductCategoryModel>(httpClient, serverUri + service));
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, exception.Message); 
+            logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
 
-        return [];
+        return (errorMessage, []);
     }
 
-    public async Task<SimpleProductCategoryModel> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName)
+    public async Task<(string errorMessage, SimpleProductCategoryModel? result)> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName)
     {
-        string service = "/SimpleProductCategory/Add";
-        string parameter = "?productCategoryName=";
+        var service = "/SimpleProductCategory/Add";
+        var parameter = "?productCategoryName=";
+        var errorMessage = string.Empty;
+        
         try
         {
-            string serverUrl = ServerUri + service + parameter + simpleProductCategoryName;
+            string serverUrl = serverUri + service + parameter + simpleProductCategoryName;
 
             var jsonPayload = JsonConvert.SerializeObject(simpleProductCategoryName);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
@@ -47,27 +50,28 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient htt
 
             response.EnsureSuccessStatusCode();
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+            var responseBody = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<SimpleProductCategoryModel>(responseBody);
 
-            return result;
+            return (errorMessage, result);
         }
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
 
-        return null;
+        return (errorMessage, null);
     }
 
     public async Task RemoveSimpleProductCategoryAsync(Guid simpleProductCategoryId)
     {
-        string service = $"/SimpleProductCategory/RemoveByProductCategoryId";
-        string parameter = $"?simpleProductCategoryId={simpleProductCategoryId}";
+        var service = $"/SimpleProductCategory/RemoveByProductCategoryId";
+        var parameter = $"?simpleProductCategoryId={simpleProductCategoryId}";
 
         try
         {
-            var response = await httpClient.DeleteAsync(ServerUri + service + parameter);
+            var response = await httpClient.DeleteAsync(serverUri + service + parameter);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception exception)
@@ -78,68 +82,80 @@ public class HttpClientManager(ILogger<HttpClientManager> logger, HttpClient htt
 
 
     // SimpleProduct
-    public async Task<List<SimpleProductModel>> GetAllSimpleProductAsync()
+    public async Task<(string errorMessage, List<SimpleProductModel>)> GetAllSimpleProductAsync()
     {
-        string service = "/SimpleProduct/GetAll";
+        var service = "/SimpleProduct/GetAll";
+        var errorMessage = string.Empty;
         try
         {
-            var response = await httpClient.GetAsync(ServerUri + service);
+            var response = await httpClient.GetAsync(serverUri + service);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<List<SimpleProductModel>>(content) ?? [];
+            return (errorMessage, JsonConvert.DeserializeObject<List<SimpleProductModel>>(content) ?? []);
         }
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
-
-        return [];
+        
+        return (errorMessage, []);       
     }
 
-    public async Task AddNewSimpleProductAsync(SimpleProductModel simpleProductModel)
+    public async Task<string> AddNewSimpleProductAsync(SimpleProductModel simpleProductModel)
     {
-        string service = "/SimpleProduct/Add";
+        var service = "/SimpleProduct/Add";
+        var errorMessage = string.Empty;
 
         try
         {
             var json = JsonConvert.SerializeObject(simpleProductModel);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync(ServerUri + service, content);
+            var response = await httpClient.PostAsync(serverUri + service, content);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
+        
+        return errorMessage;
     }
 
-    public async Task UpdateSimpleProductAsync(SimpleProductModel simpleProductModel)
+    public async Task<string> UpdateSimpleProductAsync(SimpleProductModel simpleProductModel)
     {
+        string errorMessage = string.Empty;
+        return errorMessage;
         // TODO: update simpleProduct
     }
 
-    public async Task RemoveSimpleProductAsync(Guid simpleProductId)
+    public async Task<string> RemoveSimpleProductAsync(Guid simpleProductId)
     {
-        string service = $"/SimpleProduct/RemoveBySimpleProductId";
-        string parameter = $"?simpleProductId={simpleProductId}";
-
+        var service = $"/SimpleProduct/RemoveBySimpleProductId";
+        var parameter = $"?simpleProductId={simpleProductId}";
+        string errorMessage = string.Empty;
+        
         try
         {
-            var response = await httpClient.DeleteAsync(ServerUri + service + parameter);
+            var response = await httpClient.DeleteAsync(serverUri + service + parameter);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception exception)
         {
             logger.LogError(exception, exception.Message);
+            errorMessage = exception.Message;
         }
+        
+        return errorMessage;
     }
 
-    private async Task<List<T>> CallHttpClientAndDeserializeAsync<T>(HttpClient httpClient, string url)
+    private async Task<List<T>> CallGetHttpClientAndDeserializeAsync<T>(HttpClient httpClient, string url)
     {
         var response = await httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<List<T>>(content) ?? new List<T>();
+        return JsonConvert.DeserializeObject<List<T>>(content) ?? [];
     }
 }

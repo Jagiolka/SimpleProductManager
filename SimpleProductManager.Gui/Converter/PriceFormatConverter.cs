@@ -21,7 +21,7 @@ public class PriceFormatConverter : IValueConverter
         {
             if (decimal.TryParse(stringValue, NumberStyles.Any, culture, out decimal result))
             {
-                return Math.Round(result, 2); // 0.00
+                return Math.Round(result, 2); // price: 0.00
             }
         }
         return 0m;

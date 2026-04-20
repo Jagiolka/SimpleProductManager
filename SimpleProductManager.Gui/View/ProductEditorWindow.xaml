@@ -6,38 +6,41 @@
         xmlns:local="clr-namespace:SimpleProductManager.Gui.View"
         xmlns:viewModels="clr-namespace:SimpleProductManager.Gui.ViewModel"
         xmlns:converter="clr-namespace:SimpleProductManager.Gui.Converter"
+        
         mc:Ignorable="d"
-        Title="ProductEditorWindow" MinHeight="450" MaxHeight="450" MinWidth="600" MaxWidth="600"
+        Title="Product Editor" 
+        MinHeight="350" MaxHeight="350" MinWidth="550" MaxWidth="550"
+        Background="#f5f9fb"
+        Icon="../Resources/Icons/spmIcon.png"
         d:DataContext="{d:DesignInstance viewModels:ProductEditorViewModel}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="15" />
+            <ColumnDefinition Width="150" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="20" />
-            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="35" />
             <ColumnDefinition Width="15" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="15" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="15" />
         </Grid.RowDefinitions>
-        
+
         <Label Grid.Row="1" Grid.Column="1" Content="SimpleProductId" />
-        <TextBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductModel.Id}" IsReadOnly="True" />
+        <TextBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding EditingSimpleProductModel.Id}" IsReadOnly="True" />
         
         <Label Grid.Row="2" Grid.Column="1" Content="Name" />
-        <TextBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductModel.Name, UpdateSourceTrigger=PropertyChanged}"  />
+        <TextBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding EditingSimpleProductModel.Name, UpdateSourceTrigger=PropertyChanged}"  />
         
         <Label Grid.Row="3" Grid.Column="1" Content="Beschreibung" />
-        <TextBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Text="{Binding EditingSimpleProductModel.Description, UpdateSourceTrigger=PropertyChanged}"  />
+        <TextBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Text="{Binding EditingSimpleProductModel.Description, UpdateSourceTrigger=PropertyChanged}"  />
         
         <Label Grid.Row="4" Grid.Column="1" Content="Preis" />
         <TextBox Grid.Row="4" Grid.Column="2">
@@ -49,20 +52,86 @@
                 </Binding>
             </TextBox.Text>
         </TextBox>
+        <Label Grid.Row="4" Grid.Column="3" Content="€" />
         
-        <Label Grid.Row="5" Grid.Column="1" Content="Kategorien" />        
-        <ComboBox Grid.Row="5" Grid.Column="2" 
-                  ItemsSource="{Binding ProductCategories, UpdateSourceTrigger=PropertyChanged}" 
-                  SelectedItem="{Binding SelectedComboBoxProductCategory, UpdateSourceTrigger=PropertyChanged}" 
-                  DisplayMemberPath="Name" 
+        <Label Grid.Row="5" Grid.Column="1" Content="Kategorien" />
+        <ComboBox Name="ComboBoxProductCategories"
+                  Grid.Row="5" Grid.Column="2"
+                  Style="{StaticResource ComboBoxProductCategoriesStyle}"
+                  ItemsSource="{Binding ProductCategories, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedItem="{Binding SelectedProductCategory, UpdateSourceTrigger=PropertyChanged}"
                   Text="{Binding SelectedStringName, UpdateSourceTrigger=PropertyChanged}"
-                  IsEditable="True" Margin="0,3,0,3" />
-        <Button Content="+" Grid.Row="5" Grid.Column="3" Height="20" VerticalAlignment="Center" Margin="2" Command="{Binding AddCategoryCommand}" CommandParameter="{Binding SelectedStringName}" />
-        <Button Content="-" Grid.Row="5" Grid.Column="4" Height="20" VerticalAlignment="Center" Margin="2" Command="{Binding RemoveCategoryCommand}" CommandParameter="{Binding SelectedComboBoxProductCategory}" />
+                  TextSearch.TextPath="Name"
+                  VerticalAlignment="Center"
+                  IsEditable="True">
 
-        <StackPanel Grid.Row="7" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Speichern" Height="20" Margin="0,2,2,2" Command="{Binding SaveExitCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
-            <Button Content="Abbrechen" Height="20" Margin="2,2,0,2" Command="{Binding CancelExitCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
-        </StackPanel>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="30" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Name}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"
+                                   TextTrimming="CharacterEllipsis"/>
+
+                        <Button Name="ButtonDeleteCategory" 
+                                Grid.Column="1"
+                                Width="20" Height="20" Margin="5,0,0,0" Padding="0"
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=DataContext.RemoveCategoryCommand}"
+                                CommandParameter="{Binding}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right">
+                            <Button.Content>
+                                <Image Source="../Resources/Icons/Cancel_16x.png" Width="16" Height="16" />
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        
+        <Button Name="ButtonAddCategory"
+                Grid.Row="5" Grid.Column="3"
+                VerticalAlignment="Center" HorizontalAlignment="Center"
+                Width="20" Height="20"
+                Command="{Binding AddCategoryCommand}"
+                CommandParameter="{Binding SelectedStringName}">
+            <Button.Content>
+                <Image Source="../Resources/Icons/Add_inverse_16x.png" Width="16" Height="16" />
+            </Button.Content>
+        </Button>
+        
+        <Grid Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+        
+            <Button Content="Speichern" 
+                    Grid.Row="0" Grid.Column="0" Margin="0,2,2,2" 
+                    Style="{StaticResource ButtonStandard}"
+                    Command="{Binding SaveExitCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+            <Button Content="Abbrechen" 
+                    Grid.Row="0" Grid.Column="1" Margin="2,2,0,2"
+                    Style="{StaticResource ButtonStandard}"
+                    Command="{Binding CancelExitCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+            
+            <local:LogControl x:Name="LogControlProductEditor"
+                Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,0,0,0" 
+                LogMessage="{Binding ErrorMessage}"  />
+        </Grid>
     </Grid>
 </Window>

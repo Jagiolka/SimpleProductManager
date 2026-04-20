@@ -5,7 +5,7 @@ namespace SimpleProductServices.Extensions;
 
 public static class MapSimpleProductCategoryExtensions
 {
-    public static SimpleProductCategoryModel MapToCategoryModel(this SimpleProductCategory Category) 
+    public static SimpleProductCategoryModel? MapToCategoryModel(this SimpleProductCategory Category) 
     {
         return new SimpleProductCategoryModel(Category.Id, Category.Name);
     }

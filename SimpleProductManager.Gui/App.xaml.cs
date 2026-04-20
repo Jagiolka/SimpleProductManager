@@ -31,9 +31,9 @@ public partial class App : Application
                 services.AddScoped<MainWindowViewModel>();
                 services.AddScoped<ProductEditorViewModel>();
 
-                services.AddSingleton<MainWindow>(provider => new MainWindow
+                services.AddTransient<MainWindow>(provider => new MainWindow
                 {
-                    DataContext = provider.GetRequiredService<MainWindowViewModel>()
+                    DataContext = provider.GetRequiredService<MainWindowViewModel>(),
                 });
 
                 services.AddTransient<ProductEditorWindow>(provider => new ProductEditorWindow

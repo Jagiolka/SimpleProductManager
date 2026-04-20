@@ -7,12 +7,13 @@ namespace SimpleProductManager.Gui.Manager;
 
 public interface IHttpClientManager
 {   
-    Task<List<SimpleProductModel>> GetAllSimpleProductAsync();
-    Task AddNewSimpleProductAsync(SimpleProductModel simpleProductModel);
-    Task UpdateSimpleProductAsync(SimpleProductModel simpleProductModel);
-    Task RemoveSimpleProductAsync(Guid simpleProductId);
+    Task<(string errorMessage, List<SimpleProductModel>)> GetAllSimpleProductAsync();
+    Task<string> AddNewSimpleProductAsync(SimpleProductModel simpleProductModel);
+    Task<string> UpdateSimpleProductAsync(SimpleProductModel simpleProductModel);
+    Task<string> RemoveSimpleProductAsync(Guid simpleProductId);
 
-    Task<List<SimpleProductCategoryModel>> GetAllSimpleProductCategoriesAsync();
-    Task<SimpleProductCategoryModel> AddNewSimpleProductCategoryAsync(string simpleProductCategoryName);
+    Task<(string errorMessage, List<SimpleProductCategoryModel>)> GetAllSimpleProductCategoriesAsync();
+    Task<(string errorMessage, SimpleProductCategoryModel? result)> AddNewSimpleProductCategoryAsync(
+        string simpleProductCategoryName);
     Task RemoveSimpleProductCategoryAsync(Guid simpleProductCategoryId);
 }
